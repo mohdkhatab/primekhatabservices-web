@@ -1,0 +1,8 @@
+{
+  "name": "Prime Khatab Services",
+  "description": "App development, web software, AI agents, APIs, and AI video dubbing studio led by Mohd Khatab in Rajouri, Jammu & Kashmir, India.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
