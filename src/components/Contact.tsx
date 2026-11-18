@@ -3,13 +3,12 @@ import {ArrowUpRight, Check, Copy} from 'lucide-react';
 import {STUDIO_CONTACT} from '../data/studioData';
 
 const SERVICE_OPTIONS = [
-  'App Development (Android)',
+  'App Development',
   'Web Development',
-  'AI Integration',
-  'AI Agents & Automation',
+  'AI Integration & AI Agents',
   'API Development',
-  'AI Video Dubbing & Voice AI',
-  'Media & Content Technology',
+  'AI Dubbing & Voice Solutions',
+  'Media Tech',
 ] as const;
 
 interface FormErrors {
@@ -88,14 +87,16 @@ export function Contact() {
 
     try {
       await navigator.clipboard.writeText(formatted);
-      setStatusMessage('Project brief copied to clipboard. Paste it into an email to startup@primekhatab.in.');
+      setStatusMessage(
+        'Project brief copied to clipboard. Paste it into an email to startup@primekhatab.in.'
+      );
     } catch {
       setStatusMessage(`Please email your brief directly to ${STUDIO_CONTACT.email}.`);
     }
   };
 
   return (
-    <section id="contact" className="py-16 sm:py-24 bg-white border-t border-[#E3E7EE]">
+    <section id="contact" className="py-16 sm:py-24">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
           <div className="lg:col-span-5 flex flex-col justify-between">
@@ -108,12 +109,12 @@ export function Contact() {
                 Start a project with Prime Khatab Services.
               </h2>
               <p className="text-sm sm:text-base text-[#4B5563] leading-relaxed mb-8">
-                Have an Android app, web platform, API integration, AI agent workflow, or Hindi
-                video dubbing pipeline in mind? Reach out directly by email or compose a quick brief.
+                Have a mobile app, website, AI agent workflow, custom API, or AI dubbing pipeline in
+                mind? Reach out directly by email or compose a quick brief.
               </p>
 
               <div className="space-y-4">
-                <div className="p-5 rounded-xl bg-[#F7F8FA] border border-[#E3E7EE]">
+                <div className="p-5 rounded-xl bg-white border border-[#E3E7EE]">
                   <p className="text-xs font-medium text-[#6B7280] mb-1">Business Email</p>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <a
@@ -125,7 +126,7 @@ export function Contact() {
                     <button
                       type="button"
                       onClick={handleCopyEmail}
-                      className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 text-xs font-medium text-[#0F1419] bg-white border border-[#D4DAE3] hover:border-[#0F1419] rounded-md transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D4ED8]"
+                      className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 text-xs font-medium text-[#0F1419] bg-[#F7F8FA] border border-[#D4DAE3] hover:border-[#0F1419] rounded-md transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D4ED8]"
                     >
                       {copiedEmail ? (
                         <>
@@ -140,6 +141,11 @@ export function Contact() {
                       )}
                     </button>
                   </div>
+                </div>
+
+                <div className="p-5 rounded-xl bg-white border border-[#E3E7EE]">
+                  <p className="text-xs font-medium text-[#6B7280] mb-1">Studio Address</p>
+                  <p className="text-sm font-medium text-[#0F1419]">{STUDIO_CONTACT.fullAddress}</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-6 pt-2 text-sm">
@@ -166,7 +172,7 @@ export function Contact() {
             </div>
 
             <p className="text-xs text-[#6B7280] mt-8">
-              Based in {STUDIO_CONTACT.location} · Direct replies within 24 hours.
+              Based in {STUDIO_CONTACT.fullAddress} · Direct replies within 24 hours.
             </p>
           </div>
 
@@ -174,7 +180,7 @@ export function Contact() {
             <form
               onSubmit={handleSubmit}
               noValidate
-              className="p-6 sm:p-8 rounded-xl bg-[#F7F8FA] border border-[#E3E7EE] space-y-5"
+              className="p-6 sm:p-8 rounded-xl bg-white border border-[#E3E7EE] space-y-5"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
@@ -193,7 +199,7 @@ export function Contact() {
                     placeholder="Ayesha Sharma"
                     aria-invalid={Boolean(errors.name)}
                     aria-describedby={errors.name ? 'contact-name-error' : undefined}
-                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm text-[#0F1419] bg-white border border-[#D4DAE3] rounded-lg placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm text-[#0F1419] bg-[#F7F8FA] border border-[#D4DAE3] rounded-lg placeholder:text-[#9CA3AF] focus:bg-white focus:outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
                   />
                   {errors.name && (
                     <p id="contact-name-error" className="mt-1.5 text-xs text-[#B91C1C]">
@@ -218,7 +224,7 @@ export function Contact() {
                     placeholder="you@company.com"
                     aria-invalid={Boolean(errors.email)}
                     aria-describedby={errors.email ? 'contact-email-error' : undefined}
-                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm text-[#0F1419] bg-white border border-[#D4DAE3] rounded-lg placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm text-[#0F1419] bg-[#F7F8FA] border border-[#D4DAE3] rounded-lg placeholder:text-[#9CA3AF] focus:bg-white focus:outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
                   />
                   {errors.email && (
                     <p id="contact-email-error" className="mt-1.5 text-xs text-[#B91C1C]">
@@ -233,14 +239,14 @@ export function Contact() {
                   htmlFor="contact-service"
                   className="block text-sm font-medium text-[#0F1419] mb-1.5"
                 >
-                  Primary service area
+                  Primary service
                 </label>
                 <select
                   id="contact-service"
                   name="service"
                   value={serviceArea}
                   onChange={(e) => setServiceArea(e.target.value)}
-                  className="w-full min-h-[44px] px-3.5 py-2.5 text-sm text-[#0F1419] bg-white border border-[#D4DAE3] rounded-lg focus:outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                  className="w-full min-h-[44px] px-3.5 py-2.5 text-sm text-[#0F1419] bg-[#F7F8FA] border border-[#D4DAE3] rounded-lg focus:bg-white focus:outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
                 >
                   {SERVICE_OPTIONS.map((option) => (
                     <option key={option} value={option}>
@@ -255,7 +261,7 @@ export function Contact() {
                   htmlFor="contact-summary"
                   className="block text-sm font-medium text-[#0F1419] mb-1.5"
                 >
-                  What are you building?
+                  Project details
                 </label>
                 <textarea
                   id="contact-summary"
@@ -266,7 +272,7 @@ export function Contact() {
                   placeholder="Share your goals, target platforms, timeline, or episode/API volume."
                   aria-invalid={Boolean(errors.summary)}
                   aria-describedby={errors.summary ? 'contact-summary-error' : undefined}
-                  className="w-full px-3.5 py-2.5 text-sm text-[#0F1419] bg-white border border-[#D4DAE3] rounded-lg placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                  className="w-full px-3.5 py-2.5 text-sm text-[#0F1419] bg-[#F7F8FA] border border-[#D4DAE3] rounded-lg placeholder:text-[#9CA3AF] focus:bg-white focus:outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
                 />
                 {errors.summary && (
                   <p id="contact-summary-error" className="mt-1.5 text-xs text-[#B91C1C]">
@@ -287,7 +293,7 @@ export function Contact() {
                 <button
                   type="button"
                   onClick={handleCopyBrief}
-                  className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 text-sm font-medium text-[#0F1419] bg-white border border-[#D4DAE3] hover:border-[#0F1419] rounded-lg transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D4ED8]"
+                  className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 text-sm font-medium text-[#0F1419] bg-[#F7F8FA] border border-[#D4DAE3] hover:border-[#0F1419] rounded-lg transition-colors duration-150 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D4ED8]"
                 >
                   <Copy className="w-4 h-4" aria-hidden="true" />
                   <span>Copy brief</span>
@@ -297,7 +303,7 @@ export function Contact() {
               {statusMessage && (
                 <p
                   role="status"
-                  className="text-sm text-[#0F1419] bg-white border border-[#D4DAE3] rounded-lg px-4 py-3"
+                  className="text-sm text-[#0F1419] bg-[#F7F8FA] border border-[#D4DAE3] rounded-lg px-4 py-3"
                 >
                   {statusMessage}
                 </p>

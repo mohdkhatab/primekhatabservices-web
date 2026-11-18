@@ -1,12 +1,5 @@
 import {useState} from 'react';
-import {ArrowUpRight} from 'lucide-react';
-import {
-  SERVICES,
-  STUDIO_CONTACT,
-  STUDIO_IMAGES,
-  type ServiceCategory,
-} from '../data/studioData';
-import {ImageWithFallback} from './ImageWithFallback';
+import {SERVICES, type ServiceCategory} from '../data/studioData';
 
 const FILTER_TABS: {id: ServiceCategory; label: string}[] = [
   {id: 'all', label: 'All services'},
@@ -33,11 +26,10 @@ export function Services() {
               className="font-display text-2xl sm:text-4xl font-semibold tracking-tight text-[#0F1419]"
               style={{textWrap: 'balance'}}
             >
-              Seven focused disciplines, from mobile builds to localized voice pipelines.
+              Six focused services, from mobile builds to AI dubbing and media tech.
             </h2>
           </div>
 
-          {/* Interactive segmented filter control (functional buttons) */}
           <div
             role="tablist"
             aria-label="Filter services by discipline"
@@ -69,9 +61,7 @@ export function Services() {
           {visibleServices.map((service) => (
             <article
               key={service.index}
-              className={`bg-white border border-[#E3E7EE] rounded-xl p-6 sm:p-7 flex flex-col justify-between transition-colors duration-150 hover:border-[#C5CDD8] ${
-                service.featured && activeCategory === 'all' ? 'md:col-span-2 lg:col-span-2' : ''
-              }`}
+              className="bg-white border border-[#E3E7EE] rounded-xl p-6 sm:p-7 flex flex-col justify-between transition-colors duration-150 hover:border-[#C5CDD8]"
             >
               <div>
                 <div className="flex items-center justify-between gap-4 text-xs text-[#6B7280] mb-4">
@@ -90,52 +80,22 @@ export function Services() {
                 </p>
               </div>
 
-              <ul className="space-y-2.5 pt-5 border-t border-[#EEF1F5] text-sm text-[#1F2937]">
-                {service.deliverables.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5">
-                    <span
-                      aria-hidden="true"
-                      className="mt-[9px] w-2.5 h-[1.5px] bg-[#9CA3AF] shrink-0"
-                    />
-                    <span className="leading-snug">{item}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="pt-5 border-t border-[#EEF1F5]">
+                <p className="text-xs font-semibold text-[#0F1419] mb-3">What you get</p>
+                <ul className="space-y-2.5 text-sm text-[#1F2937]">
+                  {service.deliverables.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5">
+                      <span
+                        aria-hidden="true"
+                        className="mt-[9px] w-2.5 h-[1.5px] bg-[#9CA3AF] shrink-0"
+                      />
+                      <span className="leading-snug">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </article>
           ))}
-
-          {/* Editorial Media & Voice spotlight card when showing all or media-voice */}
-          {(activeCategory === 'all' || activeCategory === 'media-voice') && (
-            <aside className="bg-white border border-[#E3E7EE] rounded-xl overflow-hidden flex flex-col justify-between">
-              <div className="aspect-[4/3] w-full overflow-hidden border-b border-[#E6EAF0]">
-                <ImageWithFallback
-                  src={STUDIO_IMAGES.mediaDubbing.src}
-                  alt={STUDIO_IMAGES.mediaDubbing.alt}
-                  fallbackLabel="Voice AI & Dubbing Production"
-                  aspectClassName="aspect-[4/3]"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-6 flex flex-col justify-between flex-1 gap-4">
-                <div>
-                  <p className="text-xs font-medium text-[#6B7280] mb-1.5">
-                    Studio Specialty · Media &amp; Audio
-                  </p>
-                  <p className="text-sm text-[#374151] leading-relaxed">
-                    Dedicated Hindi dubbing pipelines for episodic donghua, anime, and short-form
-                    dramas with balanced dialogue timing.
-                  </p>
-                </div>
-                <a
-                  href={STUDIO_CONTACT.mailtoHref}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1D4ED8] hover:text-[#1E40AF] whitespace-nowrap self-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D4ED8] rounded-sm"
-                >
-                  <span>Discuss a dubbing or media build</span>
-                  <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
-                </a>
-              </div>
-            </aside>
-          )}
         </div>
       </div>
     </section>

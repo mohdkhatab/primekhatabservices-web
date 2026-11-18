@@ -2,7 +2,7 @@ import {PROCESS_STEPS} from '../data/studioData';
 
 export function Process() {
   return (
-    <section id="process" className="py-16 sm:py-24">
+    <section id="process" className="py-16 sm:py-24 bg-white border-y border-[#E3E7EE]">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <div className="max-w-2xl mb-12">
           <p className="text-sm font-medium text-[#1D4ED8] mb-2">Process</p>

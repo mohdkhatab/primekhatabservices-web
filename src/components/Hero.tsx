@@ -19,6 +19,8 @@ export function Hero() {
                 <span>Prime Khatab Services</span>
                 <span aria-hidden="true" className="mx-2 text-[#9CA3AF]">·</span>
                 <span>Rajouri, Jammu &amp; Kashmir</span>
+                <span aria-hidden="true" className="mx-2 text-[#9CA3AF]">·</span>
+                <span>Operating since October 2026</span>
               </p>
 
               <h1
@@ -32,9 +34,10 @@ export function Hero() {
               </h1>
 
               <p className="text-base sm:text-lg text-[#4B5563] leading-relaxed max-w-2xl mb-8">
-                An independent engineering and media technology studio led by Mohd Khatab. We partner
-                with founders, digital teams, and content studios to build reliable Android apps,
-                web platforms, custom APIs, automation workflows, and Hindi AI dubbing systems.
+                A bootstrapped and self-funded engineering studio led by founder Mohd Khatab.
+                Operating since October 2026, Prime Khatab Services helps small businesses and
+                startups ship dependable Android apps, web platforms, AI agents, custom APIs, and
+                AI dubbing systems without full in-house team overhead.
               </p>
             </div>
 

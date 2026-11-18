@@ -20,7 +20,7 @@ export function Founder() {
               </div>
               <div className="px-5 py-3.5 bg-white border-t border-[#E6EAF0] flex items-center justify-between gap-4 text-xs text-[#4B5563]">
                 <span className="font-medium text-[#0F1419]">Mohd Khatab</span>
-                <span>Rajouri, Jammu &amp; Kashmir</span>
+                <span>{STUDIO_CONTACT.fullAddress}</span>
               </div>
             </div>
           </div>
@@ -31,26 +31,25 @@ export function Founder() {
               className="font-display text-2xl sm:text-4xl font-semibold tracking-tight text-[#0F1419] mb-6"
               style={{textWrap: 'balance'}}
             >
-              Built and led directly by Mohd Khatab from Rajouri, Jammu &amp; Kashmir.
+              Led directly by founder Mohd Khatab from Rajouri, Jammu &amp; Kashmir.
             </h2>
 
             <div className="space-y-4 text-sm sm:text-base text-[#374151] leading-relaxed max-w-2xl">
               <p>
-                Prime Khatab Services is a focused studio where you work directly with the person
-                architecting and shipping your product. Over the past several years, Mohd Khatab has
-                built Android applications, full-stack web software, developer utilities, and
-                automated API backends for independent creators and growing teams.
+                Prime Khatab Services is a focused, bootstrapped studio where businesses and
+                startups work directly with the engineer architecting and shipping their software.
+                Mohd Khatab handles product architecture, Android and web development, API design,
+                and AI agent integration end to end.
               </p>
               <p>
-                Alongside traditional software engineering, the studio maintains deep hands-on
-                experience in media technology—producing Hindi-dubbed donghua, anime, and
-                short-drama localization pipelines powered by practical voice AI and clean audio
-                workflows.
+                Alongside software and backend engineering, Mohd Khatab works hands-on in media
+                technology—building Hindi-dubbed donghua, anime, and short-drama localization
+                workflows powered by practical voice AI, timing sync, and clean audio processing.
               </p>
               <p>
-                Operating out of Rajouri in Jammu &amp; Kashmir, India, the studio keeps overhead
-                low and engineering standards high: clear communication, realistic timelines, and
-                software that holds up after launch day.
+                Operating out of Rajouri, Jammu &amp; Kashmir 185132, India since October 2026, the
+                studio is structured for direct accountability: clear technical scope, steady weekly
+                builds, and reliable software delivered cleanly to your team.
               </p>
             </div>
 

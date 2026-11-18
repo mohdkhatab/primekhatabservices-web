@@ -10,7 +10,7 @@ export function Faq() {
   };
 
   return (
-    <section id="faq" className="py-16 sm:py-24">
+    <section id="faq" className="py-16 sm:py-24 bg-white border-y border-[#E3E7EE]">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
           <div className="lg:col-span-4">
@@ -27,7 +27,7 @@ export function Faq() {
             </p>
           </div>
 
-          <div className="lg:col-span-8 divide-y divide-[#DCE1E8] border-t border-b border-[#DCE1E8]">
+          <div className="lg:col-span-8 divide-y divide-[#E3E7EE] border-t border-b border-[#E3E7EE]">
             {FAQ_ITEMS.map((item) => {
               const isOpen = openId === item.id;
               const panelId = `faq-panel-${item.id}`;
