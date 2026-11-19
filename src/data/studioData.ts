@@ -39,8 +39,14 @@ export const STUDIO_CONTACT = {
   email: 'startup@primekhatab.in',
   mailtoHref:
     'mailto:startup@primekhatab.in?subject=Project%20Inquiry%20%E2%80%94%20Prime%20Khatab%20Services',
+  phone: '+91 96825 44349',
+  phoneHref: 'tel:+919682544349',
   github: 'https://github.com/mohdkhatab',
   linkedin: 'https://www.linkedin.com/in/mohd-khatab-3b5b7942a/',
+  instagram: 'https://instagram.com/primekhatab',
+  instagramHandle: '@primekhatab',
+  telegram: 'https://t.me/primekhatab',
+  telegramHandle: '@primekhatab',
 } as const;
 
 export const STUDIO_IMAGES = {

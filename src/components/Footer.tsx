@@ -95,6 +95,12 @@ export function Footer({onNavigate}: FooterProps) {
               {STUDIO_CONTACT.email}
             </a>
             <a
+              href={STUDIO_CONTACT.phoneHref}
+              className="hover:text-cream transition-colors"
+            >
+              {STUDIO_CONTACT.phone}
+            </a>
+            <a
               href={STUDIO_CONTACT.github}
               target="_blank"
               rel="noopener noreferrer"
@@ -109,6 +115,22 @@ export function Footer({onNavigate}: FooterProps) {
               className="hover:text-cream transition-colors"
             >
               LinkedIn
+            </a>
+            <a
+              href={STUDIO_CONTACT.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-cream transition-colors"
+            >
+              Instagram
+            </a>
+            <a
+              href={STUDIO_CONTACT.telegram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-cream transition-colors"
+            >
+              Telegram
             </a>
           </div>
         </div>

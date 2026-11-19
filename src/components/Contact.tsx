@@ -151,6 +151,18 @@ export function Contact() {
 
                 <div className="p-5 rounded-xl bg-panel border border-line">
                   <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-faint mb-1.5">
+                    Call / WhatsApp
+                  </p>
+                  <a
+                    href={STUDIO_CONTACT.phoneHref}
+                    className="font-display text-lg font-semibold text-cream hover:text-accent transition-colors"
+                  >
+                    {STUDIO_CONTACT.phone}
+                  </a>
+                </div>
+
+                <div className="p-5 rounded-xl bg-panel border border-line">
+                  <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-faint mb-1.5">
                     Studio Address
                   </p>
                   <p className="text-sm font-medium text-cream">{STUDIO_CONTACT.fullAddress}</p>
@@ -173,6 +185,24 @@ export function Contact() {
                     className="inline-flex items-center gap-1.5 min-h-[40px] font-medium text-muted hover:text-cream transition-colors"
                   >
                     <span>LinkedIn</span>
+                    <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+                  </a>
+                  <a
+                    href={STUDIO_CONTACT.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 min-h-[40px] font-medium text-muted hover:text-cream transition-colors"
+                  >
+                    <span>Instagram {STUDIO_CONTACT.instagramHandle}</span>
+                    <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+                  </a>
+                  <a
+                    href={STUDIO_CONTACT.telegram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 min-h-[40px] font-medium text-muted hover:text-cream transition-colors"
+                  >
+                    <span>Telegram {STUDIO_CONTACT.telegramHandle}</span>
                     <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
                   </a>
                 </div>
