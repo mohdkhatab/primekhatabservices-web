@@ -183,8 +183,16 @@ export const PROJECTS: ProjectItem[] = [
     statusTone: 'live',
     stack: 'Python · AI voice synthesis · FFmpeg',
     summary:
-      'The production pipeline behind the studio\'s daily Hindi releases: transcription, context-aware script adaptation, per-character voice casting, lip-sync fitted timing and a clean final mix — original music and effects kept.',
+      'The production pipeline behind the studio\'s daily Hindi releases: transcription, context-aware script adaptation, per-character voice casting, lip-sync fitted timing and a clean final mix — original music and effects kept. Packaged as an agent skill any AI assistant can run.',
     repo: 'https://github.com/mohdkhatab/video-dubbing-skill',
+  },
+  {
+    name: 'DubFlow — Dubbing Platform',
+    status: 'Studio Product',
+    statusTone: 'live',
+    stack: 'React · TypeScript · Backend job orchestration',
+    summary:
+      'A full-stack video dubbing and transcription platform: web UI, secure backend job orchestration, file storage, live status polling, agent reports and logs, with OpenRouter-compatible model integration.',
   },
   {
     name: 'Telegram Personal Agent',
@@ -223,58 +231,12 @@ export const PROJECTS: ProjectItem[] = [
     repo: 'https://github.com/mohdkhatab/shorts-video-studio',
   },
   {
-    name: 'Anime Streaming App',
-    status: 'In Production',
-    statusTone: 'live',
-    stack: 'Kotlin · Android · Media playback',
-    summary:
-      'A consumer Android app for anime and donghua streaming, engineered for smooth playback, fast catalog browsing and dependable performance across everyday devices.',
-    repo: 'https://github.com/mohdkhatab/AnimeApp',
-  },
-  {
-    name: 'Mini VPS Manager',
-    status: 'Open Source',
+    name: 'AI Agent Voice',
+    status: 'Studio Product',
     statusTone: 'open',
-    stack: 'Shell · REST API · Linux infrastructure',
+    stack: 'TypeScript · Real-time voice AI',
     summary:
-      'An all-in-one suite that partitions any VPS into isolated mini-VPS instances — dedicated CPU, RAM and Btrfs storage quotas, custom SSH access and an OpenAPI REST control layer.',
-    repo: 'https://github.com/mohdkhatab/minivps-manager',
-  },
-  {
-    name: 'Chatindo — Encrypted Messenger',
-    status: 'Open Source',
-    statusTone: 'open',
-    stack: 'Flutter · Dart · E2E encryption',
-    summary:
-      'End-to-end encrypted messaging with a premium liquid-glass interface — a full consumer chat product built in Flutter.',
-    repo: 'https://github.com/mohdkhatab/chatindo-app',
-  },
-  {
-    name: 'UV Player',
-    status: 'Open Source',
-    statusTone: 'open',
-    stack: 'Flutter · Dart · Media UI',
-    summary:
-      'A liquid-glass multimedia player with dynamic theming that adapts its interface to the media on screen.',
-    repo: 'https://github.com/mohdkhatab/uv-player',
-  },
-  {
-    name: 'TmpDrop — Temp File Sharing',
-    status: 'Open Source',
-    statusTone: 'open',
-    stack: 'TypeScript · Web app · Public API',
-    summary:
-      'Fast, anonymous temporary file sharing with custom expiration presets and a public upload API for developers.',
-    repo: 'https://github.com/mohdkhatab/tmpdrop',
-  },
-  {
-    name: 'Neon Jump Runner',
-    status: 'Open Source',
-    statusTone: 'open',
-    stack: 'TypeScript · Browser game',
-    summary:
-      'A neon-styled endless runner game built for the browser — the studio\'s game-development playground for fast, dependency-light web games.',
-    repo: 'https://github.com/mohdkhatab/remix_-neon-jump-runner',
+      'A voice-first AI agent that holds natural spoken conversations — live speech in, reasoning, and speech back out — built for hands-free assistance and voice-driven workflows.',
   },
 ];
 
