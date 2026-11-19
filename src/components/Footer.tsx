@@ -21,93 +21,76 @@ export function Footer({onNavigate}: FooterProps) {
     onNavigate(path);
   };
 
+  const homeLinks = [
+    {label: 'Services', hash: '#services'},
+    {label: 'About', hash: '#about'},
+    {label: 'Work', hash: '#work'},
+    {label: 'Process', hash: '#process'},
+    {label: 'Founder', hash: '#founder'},
+    {label: 'FAQ', hash: '#faq'},
+    {label: 'Contact', hash: '#contact'},
+  ] as const;
+
   return (
-    <footer className="bg-white border-t border-[#E3E7EE] py-12">
+    <footer className="bg-ink2 border-t border-line pt-14 pb-10">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-8 border-b border-[#E3E7EE]">
-          <div>
-            <p className="font-display text-base font-semibold text-[#0F1419]">
-              {STUDIO_CONTACT.name}
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-10 pb-10 border-b border-line">
+          <div className="max-w-sm">
+            <p className="flex items-center gap-2.5 mb-3">
+              <span
+                aria-hidden="true"
+                className="w-8 h-8 rounded-md bg-accent text-[#1A1206] font-display font-bold text-sm flex items-center justify-center"
+              >
+                PK
+              </span>
+              <span className="font-display text-lg font-semibold text-cream">
+                {STUDIO_CONTACT.name}
+              </span>
             </p>
-            <p className="text-sm text-[#4B5563] mt-1">
-              Founded by {STUDIO_CONTACT.founder} · {STUDIO_CONTACT.fullAddress}
+            <p className="text-sm text-muted leading-relaxed">
+              Founder-led software, AI and media studio. Founded by {STUDIO_CONTACT.founder} ·{' '}
+              {STUDIO_CONTACT.fullAddress}
             </p>
           </div>
 
-          <nav aria-label="Footer" className="flex flex-wrap items-center gap-6 text-sm text-[#4B5563]">
-            <a
-              href="/#services"
-              onClick={(e) => handleHomeLink(e, '#services')}
-              className="hover:text-[#0F1419] transition-colors"
-            >
-              Services
-            </a>
-            <a
-              href="/#about"
-              onClick={(e) => handleHomeLink(e, '#about')}
-              className="hover:text-[#0F1419] transition-colors"
-            >
-              About
-            </a>
-            <a
-              href="/#work"
-              onClick={(e) => handleHomeLink(e, '#work')}
-              className="hover:text-[#0F1419] transition-colors"
-            >
-              Work
-            </a>
-            <a
-              href="/#process"
-              onClick={(e) => handleHomeLink(e, '#process')}
-              className="hover:text-[#0F1419] transition-colors"
-            >
-              Process
-            </a>
-            <a
-              href="/#founder"
-              onClick={(e) => handleHomeLink(e, '#founder')}
-              className="hover:text-[#0F1419] transition-colors"
-            >
-              Founder
-            </a>
-            <a
-              href="/#faq"
-              onClick={(e) => handleHomeLink(e, '#faq')}
-              className="hover:text-[#0F1419] transition-colors"
-            >
-              FAQ
-            </a>
-            <a
-              href="/#contact"
-              onClick={(e) => handleHomeLink(e, '#contact')}
-              className="hover:text-[#0F1419] transition-colors"
-            >
-              Contact
-            </a>
+          <nav
+            aria-label="Footer"
+            className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted"
+          >
+            {homeLinks.map((link) => (
+              <a
+                key={link.hash}
+                href={`/${link.hash}`}
+                onClick={(e) => handleHomeLink(e, link.hash)}
+                className="hover:text-cream transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
             <a
               href="/privacy"
               onClick={(e) => handleLegalLink(e, '/privacy')}
-              className="hover:text-[#0F1419] transition-colors"
+              className="hover:text-cream transition-colors"
             >
               Privacy Policy
             </a>
             <a
               href="/terms"
               onClick={(e) => handleLegalLink(e, '/terms')}
-              className="hover:text-[#0F1419] transition-colors"
+              className="hover:text-cream transition-colors"
             >
               Terms of Service
             </a>
           </nav>
         </div>
 
-        <div className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-[#6B7280]">
+        <div className="pt-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-faint">
           <p>© 2026 Prime Khatab Services. All rights reserved.</p>
 
           <div className="flex flex-wrap items-center gap-5">
             <a
               href={STUDIO_CONTACT.mailtoHref}
-              className="hover:text-[#0F1419] transition-colors"
+              className="hover:text-cream transition-colors"
             >
               {STUDIO_CONTACT.email}
             </a>
@@ -115,7 +98,7 @@ export function Footer({onNavigate}: FooterProps) {
               href={STUDIO_CONTACT.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-[#0F1419] transition-colors"
+              className="hover:text-cream transition-colors"
             >
               GitHub
             </a>
@@ -123,7 +106,7 @@ export function Footer({onNavigate}: FooterProps) {
               href={STUDIO_CONTACT.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-[#0F1419] transition-colors"
+              className="hover:text-cream transition-colors"
             >
               LinkedIn
             </a>

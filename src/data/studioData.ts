@@ -45,16 +45,16 @@ export const STUDIO_CONTACT = {
 
 export const STUDIO_IMAGES = {
   heroDesk: {
-    src: '/src/assets/images/hero_studio_desk_1794901602064.jpg',
-    alt: 'Prime Khatab Services engineering workstation showing interface architecture and audio waveform tools beside a misty mountain window',
+    src: '/images/hero-studio.jpg',
+    alt: 'The Prime Khatab Services studio desk at dusk — an ultrawide monitor with code and audio waveforms, a phone running a media app, and the misty Pir Panjal mountains of Rajouri outside the window',
   },
   mediaDubbing: {
-    src: '/src/assets/images/service_media_dubbing_1794901602820.jpg',
-    alt: 'Voice AI and multilingual video dubbing workstation with broadcast microphone and dual timeline monitors',
+    src: '/images/dubbing-studio.jpg',
+    alt: 'Inside the Prime Khatab Services dubbing studio — a broadcast condenser microphone and dual monitors running multi-character voice timelines',
   },
   founderPortrait: {
-    src: '/src/assets/images/founder_portrait_khatab_1794901605301.jpg',
-    alt: 'Mohd Khatab, founder of Prime Khatab Services, seated in a daylight studio in Rajouri, Jammu and Kashmir',
+    src: '/images/founder-workspace.jpg',
+    alt: 'The founder\u2019s desk in Rajouri, Jammu & Kashmir — laptop with code, a phone testing a streaming app, hand-sketched app wireframes in a notebook, and the green Himalayan valley outside the window',
   },
 } as const;
 

@@ -81,10 +81,10 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen flex flex-col bg-[#F7F8FA] text-[#0F1419]">
+      <div className="min-h-screen flex flex-col bg-ink text-cream">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#0F1419] focus:text-white focus:rounded-md focus:text-sm"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-[#1A1206] focus:rounded-md focus:text-sm"
         >
           Skip to main content
         </a>

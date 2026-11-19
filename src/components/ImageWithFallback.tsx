@@ -24,12 +24,12 @@ export function ImageWithFallback({
       <div
         role="img"
         aria-label={alt}
-        className={`flex flex-col items-center justify-center bg-[#EEF1F5] border border-[#DCE1E8] text-[#4B5563] p-6 text-center ${aspectClassName} ${className}`}
+        className={`flex flex-col items-center justify-center bg-panel border border-line text-muted p-6 text-center ${aspectClassName} ${className}`}
       >
-        <span className="font-mono text-xs tracking-wide text-[#6B7280] mb-1.5">
+        <span className="font-mono text-xs tracking-wide text-faint mb-1.5">
           Studio Visual
         </span>
-        <span className="font-display text-sm font-medium text-[#0F1419] max-w-xs">
+        <span className="font-display text-sm font-medium text-cream max-w-xs">
           {fallbackLabel}
         </span>
       </div>

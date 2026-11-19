@@ -10,24 +10,24 @@ export function Faq() {
   };
 
   return (
-    <section id="faq" className="py-16 sm:py-24 bg-white border-y border-[#E3E7EE]">
+    <section id="faq" className="py-20 sm:py-28 bg-ink2 border-y border-line">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
           <div className="lg:col-span-4">
-            <p className="text-sm font-medium text-[#1D4ED8] mb-2">FAQ</p>
+            <p className="section-label mb-3">FAQ</p>
             <h2
-              className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-[#0F1419] mb-4"
+              className="font-display text-3xl sm:text-[2.2rem] leading-[1.15] font-semibold tracking-tight text-cream mb-4"
               style={{textWrap: 'balance'}}
             >
               Common questions before starting.
             </h2>
-            <p className="text-sm sm:text-[15px] text-[#4B5563] leading-relaxed">
+            <p className="text-sm sm:text-[15px] text-muted leading-relaxed">
               Practical details on timelines, source-code ownership, voice AI workflows, and how
               the studio collaborates across time zones.
             </p>
           </div>
 
-          <div className="lg:col-span-8 divide-y divide-[#E3E7EE] border-t border-b border-[#E3E7EE]">
+          <div className="lg:col-span-8 divide-y divide-line border-t border-b border-line">
             {FAQ_ITEMS.map((item) => {
               const isOpen = openId === item.id;
               const panelId = `faq-panel-${item.id}`;
@@ -42,12 +42,12 @@ export function Faq() {
                       aria-expanded={isOpen}
                       aria-controls={panelId}
                       onClick={() => toggleItem(item.id)}
-                      className="w-full min-h-[56px] py-4 flex items-center justify-between gap-4 text-left text-base font-medium text-[#0F1419] hover:text-[#1D4ED8] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D4ED8] rounded-sm"
+                      className="w-full min-h-[56px] py-4 flex items-center justify-between gap-4 text-left text-base font-medium text-cream hover:text-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
                     >
                       <span className="font-display font-semibold">{item.question}</span>
                       <ChevronDown
-                        className={`w-5 h-5 text-[#6B7280] shrink-0 transition-transform duration-150 ${
-                          isOpen ? 'rotate-180 text-[#1D4ED8]' : ''
+                        className={`w-5 h-5 text-faint shrink-0 transition-transform duration-150 ${
+                          isOpen ? 'rotate-180 text-accent' : ''
                         }`}
                         aria-hidden="true"
                       />
@@ -59,7 +59,7 @@ export function Faq() {
                     role="region"
                     aria-labelledby={buttonId}
                     hidden={!isOpen}
-                    className="pb-5 pr-8 text-sm sm:text-[15px] text-[#4B5563] leading-relaxed"
+                    className="pb-5 pr-8 text-sm sm:text-[15px] text-muted leading-relaxed"
                   >
                     {item.answer}
                   </div>
