@@ -39,3 +39,5 @@ npm install
 npm run build   # production build
 npm run lint    # tsc --noEmit
 ```
+
+<!-- Repository made public on 2026-11-19 so Vercel Hobby can deploy it. -->
