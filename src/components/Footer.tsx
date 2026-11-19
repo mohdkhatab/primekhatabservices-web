@@ -24,7 +24,7 @@ export function Footer({onNavigate}: FooterProps) {
   const homeLinks = [
     {label: 'Services', hash: '#services'},
     {label: 'About', hash: '#about'},
-    {label: 'Work', hash: '#work'},
+    {label: 'Projects', hash: '#work'},
     {label: 'Process', hash: '#process'},
     {label: 'Founder', hash: '#founder'},
     {label: 'FAQ', hash: '#faq'},

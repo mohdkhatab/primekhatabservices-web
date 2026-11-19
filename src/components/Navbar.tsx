@@ -8,7 +8,7 @@ interface NavbarProps {
 const NAV_LINKS = [
   {label: 'Services', hash: '#services'},
   {label: 'About', hash: '#about'},
-  {label: 'Work', hash: '#work'},
+  {label: 'Projects', hash: '#work'},
   {label: 'Process', hash: '#process'},
   {label: 'Founder', hash: '#founder'},
   {label: 'FAQ', hash: '#faq'},

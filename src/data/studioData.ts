@@ -158,41 +158,123 @@ export const SERVICES: ServiceItem[] = [
   },
 ];
 
-export const WORK_HIGHLIGHTS: WorkHighlightItem[] = [
+export interface ProjectItem {
+  name: string;
+  status: string;
+  statusTone: 'live' | 'open' | 'soon';
+  stack: string;
+  summary: string;
+  repo?: string;
+}
+
+export const FEATURED_PROJECT: ProjectItem = {
+  name: 'Live Video Dubbing',
+  status: 'Upcoming — Flagship',
+  statusTone: 'soon',
+  stack: 'Real-time AI voice pipeline · Live streaming infra',
+  summary:
+    'The studio\'s flagship launch in the making: the proven episode-dubbing pipeline, rebuilt to dub video live as it plays — per-character AI voices, fitted timing and the original music kept, streamed in Hindi in real time. The launch infrastructure is currently being prepared with cloud startup support so the pipeline can run live, at scale, from day one.',
+};
+
+export const PROJECTS: ProjectItem[] = [
   {
-    index: '01',
-    category: 'Shipped Android Apps',
-    scope: 'Mobile Engineering',
+    name: 'AI Video Dubbing Pipeline',
+    status: 'In Production',
+    statusTone: 'live',
+    stack: 'Python · AI voice synthesis · FFmpeg',
     summary:
-      'Consumer-facing Android applications built for smooth playback, clean offline caching, and dependable day-to-day performance across varied devices.',
+      'The production pipeline behind the studio\'s daily Hindi releases: transcription, context-aware script adaptation, per-character voice casting, lip-sync fitted timing and a clean final mix — original music and effects kept.',
+    repo: 'https://github.com/mohdkhatab/video-dubbing-skill',
   },
   {
-    index: '02',
-    category: 'AI Tools, APIs & Automation',
-    scope: 'Applied AI Systems',
+    name: 'Telegram Personal Agent',
+    status: 'Open Source',
+    statusTone: 'open',
+    stack: 'Python · Telethon / MTProto · OpenAI-compatible APIs',
     summary:
-      'Custom REST APIs, model-orchestration backends, AI agent workflows, and automated task runners that turn manual operations into predictable pipelines.',
+      'An AI agent that runs a personal Telegram account end to end — reading and replying in DMs and groups through any OpenAI-compatible model API, from OpenRouter and OpenAI to Groq or a local Ollama bridge.',
+    repo: 'https://github.com/mohdkhatab/telegram-personal-agent',
   },
   {
-    index: '03',
-    category: 'Hindi-Dubbed Donghua, Anime & Short-Drama Production',
-    scope: 'AI Dubbing & Voice Solutions',
+    name: 'Prime AI Agent Skills',
+    status: 'Open Source',
+    statusTone: 'open',
+    stack: '39 skills · Multi-agent orchestration',
     summary:
-      'Episodic Hindi dubbing workflows blending timing-accurate script localization, multi-voice synthesis, and clean audio post-processing.',
+      'A complete collection of 39 production-ready autonomous AI agent skills — multi-agent orchestration, deep research, full-stack development, a document engine and enterprise automation workflows.',
+    repo: 'https://github.com/mohdkhatab/prime-ai-agent-skills',
   },
   {
-    index: '04',
-    category: 'Media & Streaming App Experiences',
-    scope: 'Media Tech',
+    name: 'UPI Payment Gateway',
+    status: 'Open Source',
+    statusTone: 'open',
+    stack: 'PHP 8 · MySQL & SQLite · Backend APIs',
     summary:
-      'Playback-centric mobile and web interfaces engineered for fast catalog browsing, subtitle switching, and uninterrupted episode continuity.',
+      'An enterprise-grade, lightweight UPI payment gateway in core PHP: merchant dashboard, a Razorpay-style slide-up checkout SDK, SQL-backed order storage and automated payment-confirmation parsing.',
+    repo: 'https://github.com/mohdkhatab/prime-khatab-upi-gateway',
   },
   {
-    index: '05',
-    category: 'Developer Tools',
-    scope: 'Engineering Utilities',
+    name: 'Shorts Video Studio',
+    status: 'Open Source',
+    statusTone: 'open',
+    stack: 'Python · Motion graphics engine',
     summary:
-      'Focused command-line utilities, API testing helpers, and internal workflow tools built to keep small teams shipping cleanly.',
+      'An agent skill plus Python engine that turns a researched script into a finished 9:16 Short — cue-synced motion graphics, kinetic captions, synthesized music and a loudness-normalised mix. No GPU, no video editor.',
+    repo: 'https://github.com/mohdkhatab/shorts-video-studio',
+  },
+  {
+    name: 'Anime Streaming App',
+    status: 'In Production',
+    statusTone: 'live',
+    stack: 'Kotlin · Android · Media playback',
+    summary:
+      'A consumer Android app for anime and donghua streaming, engineered for smooth playback, fast catalog browsing and dependable performance across everyday devices.',
+    repo: 'https://github.com/mohdkhatab/AnimeApp',
+  },
+  {
+    name: 'Mini VPS Manager',
+    status: 'Open Source',
+    statusTone: 'open',
+    stack: 'Shell · REST API · Linux infrastructure',
+    summary:
+      'An all-in-one suite that partitions any VPS into isolated mini-VPS instances — dedicated CPU, RAM and Btrfs storage quotas, custom SSH access and an OpenAPI REST control layer.',
+    repo: 'https://github.com/mohdkhatab/minivps-manager',
+  },
+  {
+    name: 'Chatindo — Encrypted Messenger',
+    status: 'Open Source',
+    statusTone: 'open',
+    stack: 'Flutter · Dart · E2E encryption',
+    summary:
+      'End-to-end encrypted messaging with a premium liquid-glass interface — a full consumer chat product built in Flutter.',
+    repo: 'https://github.com/mohdkhatab/chatindo-app',
+  },
+  {
+    name: 'UV Player',
+    status: 'Open Source',
+    statusTone: 'open',
+    stack: 'Flutter · Dart · Media UI',
+    summary:
+      'A liquid-glass multimedia player with dynamic theming that adapts its interface to the media on screen.',
+    repo: 'https://github.com/mohdkhatab/uv-player',
+  },
+  {
+    name: 'TmpDrop — Temp File Sharing',
+    status: 'Open Source',
+    statusTone: 'open',
+    stack: 'TypeScript · Web app · Public API',
+    summary:
+      'Fast, anonymous temporary file sharing with custom expiration presets and a public upload API for developers.',
+    repo: 'https://github.com/mohdkhatab/tmpdrop',
+  },
+  {
+    name: 'Neon Jump Runner',
+    status: 'Open Source',
+    statusTone: 'open',
+    stack: 'TypeScript · Browser game',
+    summary:
+      'A neon-styled endless runner game built for the browser — the studio\'s game-development playground for fast, dependency-light web games.',
+    repo: 'https://github.com/mohdkhatab/remix_-neon-jump-runner',
   },
 ];
 
