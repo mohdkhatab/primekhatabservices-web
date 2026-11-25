@@ -2,6 +2,18 @@ import localDeals from "@/data/deals.json";
 import localCustomCategories from "@/data/categories.json";
 import { getSupabase } from "./supabase";
 
+/** Deal types — the second browsing axis (Topics = categories, Types = how the saving works). */
+export const DEAL_TYPES = [
+  "Freebies",
+  "Discounts",
+  "Trials",
+  "Credits",
+  "Promo Codes",
+  "No Credit Card",
+] as const;
+
+export type DealType = (typeof DEAL_TYPES)[number];
+
 export type Deal = {
   id: string;
   brand: string;
@@ -14,9 +26,15 @@ export type Deal = {
   expiry: string; // ISO date YYYY-MM-DD
   verified: boolean;
   created_at?: string;
+  // Resourify-style enrichment fields (all optional in raw data — normalizeDeal fills defaults)
+  type?: DealType | string;
+  views?: number;
+  clicks?: number;
+  benefits?: string[];
+  featured?: boolean;
 };
 
-/** All deal categories — covers every deal type Prime asked for. */
+/** All deal categories (Topics) — covers every deal type Prime asked for. */
 export const BASE_CATEGORIES = [
   "Coding Platforms",
   "Hosting & Domains",
@@ -58,6 +76,70 @@ export function isExpired(deal: Deal): boolean {
   return new Date(deal.expiry + "T23:59:59") < new Date();
 }
 
+/** Whole days left until expiry (negative = expired). */
+export function daysLeft(deal: Deal): number {
+  if (!deal.expiry) return 9999;
+  const end = new Date(deal.expiry + "T23:59:59").getTime();
+  return Math.ceil((end - Date.now()) / 86400000);
+}
+
+/** Infer a deal type when raw data (API/Supabase/older JSON) has none. */
+export function inferType(deal: Deal): DealType {
+  const badge = (deal.badge ?? "").toUpperCase();
+  if (deal.code && deal.code.toUpperCase() !== "FREE") return "Promo Codes";
+  if (/CREDIT|\$|₹/.test(badge)) return "Credits";
+  if (/%|OFF/.test(badge)) return "Discounts";
+  if (/TRIAL/.test(badge)) return "Trials";
+  if (badge === "FREE" && !deal.code) return "No Credit Card";
+  return "Freebies";
+}
+
+/** Fill enrichment defaults so every source (API / Supabase / JSON) renders the same. */
+export function normalizeDeal(deal: Deal): Deal {
+  return {
+    ...deal,
+    type: deal.type && (DEAL_TYPES as readonly string[]).includes(deal.type) ? deal.type : inferType(deal),
+    views: typeof deal.views === "number" ? deal.views : 0,
+    clicks: typeof deal.clicks === "number" ? deal.clicks : 0,
+    benefits: Array.isArray(deal.benefits) ? deal.benefits : [],
+    featured: Boolean(deal.featured),
+  };
+}
+
+/** Status label used on rich cards, Resourify-style. */
+export type DealStatus = "Expired" | "Limited Time" | "New" | "Trending" | "Active";
+
+export function dealStatus(deal: Deal): DealStatus {
+  if (isExpired(deal)) return "Expired";
+  const left = daysLeft(deal);
+  if (left <= 45) return "Limited Time";
+  const ageDays = deal.created_at
+    ? Math.floor((Date.now() - new Date(deal.created_at + "T00:00:00").getTime()) / 86400000)
+    : 999;
+  if (ageDays <= 21) return "New";
+  if ((deal.clicks ?? 0) >= 300) return "Trending";
+  return "Active";
+}
+
+/** Big discount figure for the detail page, e.g. "70% OFF", "$200", "FREE". */
+export function discountFigure(deal: Deal): string {
+  const badge = (deal.badge ?? "").trim();
+  if (badge) return badge.toUpperCase().includes("OFF") || badge === "FREE" ? badge : badge;
+  return deal.code ? "CODE" : "FREE";
+}
+
+export function formatCount(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+  return String(n);
+}
+
+export function formatDate(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso + "T00:00:00");
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
 /**
  * Data layer — priority order:
  * 1. NEXT_PUBLIC_API_BASE set → Supabase Edge Function API (GET /deals).
@@ -85,7 +167,7 @@ async function fetchDealsFromApi(): Promise<Deal[] | null> {
 
 export async function getDeals(): Promise<Deal[]> {
   const fromApi = await fetchDealsFromApi();
-  if (fromApi && fromApi.length > 0) return fromApi.filter((d) => !isExpired(d));
+  if (fromApi && fromApi.length > 0) return fromApi.filter((d) => !isExpired(d)).map(normalizeDeal);
   const supabase = getSupabase();
   if (supabase) {
     try {
@@ -95,13 +177,13 @@ export async function getDeals(): Promise<Deal[]> {
         .eq("published", true)
         .order("created_at", { ascending: false });
       if (!error && data && data.length > 0) {
-        return (data as Deal[]).filter((d) => !isExpired(d));
+        return (data as Deal[]).filter((d) => !isExpired(d)).map(normalizeDeal);
       }
     } catch {
       // fall through to local JSON
     }
   }
-  return (localDeals as Deal[]).filter((d) => !isExpired(d));
+  return (localDeals as Deal[]).filter((d) => !isExpired(d)).map(normalizeDeal);
 }
 
 export async function getDealById(id: string): Promise<Deal | undefined> {
@@ -111,7 +193,7 @@ export async function getDealById(id: string): Promise<Deal | undefined> {
       const res = await fetch(`${base}/deals/${encodeURIComponent(id)}`, { cache: "no-store" });
       if (res.ok) {
         const body = (await res.json()) as { deal?: Deal };
-        if (body.deal && !isExpired(body.deal)) return body.deal;
+        if (body.deal && !isExpired(body.deal)) return normalizeDeal(body.deal);
       }
     } catch {
       // fall through to the list lookup

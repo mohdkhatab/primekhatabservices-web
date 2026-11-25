@@ -3,6 +3,8 @@ import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AnnouncementBar from "@/components/AnnouncementBar";
+import { getDeals } from "@/lib/deals";
 
 // Premium fonts, self-hosted/optimized by next/font (no layout shift, fast).
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -67,7 +69,9 @@ const websiteJsonLd = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const deals = await getDeals();
+  const featuredDeal = deals.find((d) => d.featured) ?? deals[0];
   return (
     <html lang="en" className={`${inter.variable} ${display.variable}`}>
       <body className="bg-white font-sans text-stone-800 antialiased">
@@ -78,6 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Ad network scripts go here when approved, e.g. Google AdSense:
             <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXX" crossOrigin="anonymous" />
             HilltopAds: paste the site verification / zone script here. */}
+        {featuredDeal && <AnnouncementBar deal={featuredDeal} />}
         <Header />
         <main className="mx-auto min-h-[60vh] max-w-6xl px-4 py-8">{children}</main>
         <Footer />

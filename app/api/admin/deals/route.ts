@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   if (!authorized(req)) return unauthorized();
   try {
     const body = await req.json();
-    const { brand, title, description, code, url, category, expiry, badge } = body ?? {};
+    const { brand, title, description, code, url, category, expiry, badge, type, benefits, featured } = body ?? {};
     if (!brand || !title || !url || !category) {
       return NextResponse.json({ error: "brand, title, url and category are required" }, { status: 400 });
     }
@@ -38,6 +38,9 @@ export async function POST(req: NextRequest) {
       category,
       expiry: expiry ?? "2099-12-31",
       badge: badge ?? "FREE",
+      ...(type ? { type } : {}),
+      ...(Array.isArray(benefits) ? { benefits } : {}),
+      ...(typeof featured === "boolean" ? { featured } : {}),
     });
     return NextResponse.json({ ok: true, deal }, { status: 201 });
   } catch (e) {

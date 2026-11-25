@@ -34,6 +34,11 @@ async function readJson<T>(file: string, fallback: T): Promise<T> {
 
 export async function addDeal(input: Omit<Deal, "id" | "created_at" | "verified"> & { verified?: boolean }): Promise<Deal> {
   const deal: Deal = {
+    type: "Freebies",
+    views: 0,
+    clicks: 0,
+    benefits: [],
+    featured: false,
     ...input,
     id: slugifyId(`${input.brand}-${input.title}`) + "-" + Date.now().toString(36),
     verified: input.verified ?? true,

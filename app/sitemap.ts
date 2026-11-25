@@ -8,8 +8,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   return [
     { url: `${BASE}/`, lastModified: now, changeFrequency: "daily", priority: 1 },
+    { url: `${BASE}/categories`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${BASE}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${BASE}/submit-deal`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${BASE}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${BASE}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     ...getCategoryNames().map((c) => ({
       url: `${BASE}/category/${categorySlug(c)}`,
       lastModified: now,

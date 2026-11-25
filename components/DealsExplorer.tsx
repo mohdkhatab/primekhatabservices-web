@@ -1,30 +1,38 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import type { Deal } from "@/lib/deals";
+import { DEAL_TYPES, type Deal } from "@/lib/deals";
 import DealCard from "./DealCard";
 import AdSlot from "./AdSlot";
 
 export default function DealsExplorer({
   deals,
   categories,
+  initialQuery = "",
+  initialType = "All",
 }: {
   deals: Deal[];
   categories: string[];
+  initialQuery?: string;
+  initialType?: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [active, setActive] = useState("All");
+  const [activeType, setActiveType] = useState(
+    (DEAL_TYPES as readonly string[]).includes(initialType) ? initialType : "All"
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return deals.filter((d) => {
       const inCategory = active === "All" || d.category === active;
+      const inType = activeType === "All" || d.type === activeType;
       const inQuery =
         !q ||
-        [d.brand, d.title, d.description, d.category, d.code].join(" ").toLowerCase().includes(q);
-      return inCategory && inQuery;
+        [d.brand, d.title, d.description, d.category, d.code, d.type ?? ""].join(" ").toLowerCase().includes(q);
+      return inCategory && inType && inQuery;
     });
-  }, [deals, query, active]);
+  }, [deals, query, active, activeType]);
 
   return (
     <section>
@@ -56,18 +64,37 @@ export default function DealsExplorer({
         ))}
       </div>
 
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+        <span className="text-xs font-bold uppercase tracking-wider text-stone-400">Deal type:</span>
+        {["All", ...DEAL_TYPES].map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setActiveType(t)}
+            className={`rounded-full px-3 py-1 text-[13px] font-semibold transition-all duration-300 hover:scale-105 active:scale-95 ${
+              activeType === t
+                ? "bg-pink-600 text-white shadow-glow"
+                : "bg-pink-50 text-brand-700 ring-1 ring-pink-200 hover:bg-pink-100"
+            }`}
+          >
+            #{t}
+          </button>
+        ))}
+      </div>
+
       <p className="mt-8 text-sm font-semibold text-stone-500">
         <span className="text-brand-600">{filtered.length}</span> live deal{filtered.length === 1 ? "" : "s"}
         {active !== "All" ? ` in ${active}` : ""}
+        {activeType !== "All" ? ` · #${activeType}` : ""}
         {query ? ` for “${query}”` : ""}
       </p>
 
       {filtered.length === 0 ? (
         <p className="mt-6 animate-fade-in rounded-2xl border border-pink-100 bg-pink-50/50 p-8 text-center text-stone-500">
-          No live deals found. Try another search or category — new deals are added regularly.
+          No live deals found. Try another search, category or deal type — new deals are added regularly.
         </p>
       ) : (
-        <div key={`${active}-${query}`} className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div key={`${active}-${activeType}-${query}`} className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((deal, i) => (
             <Fragment key={deal.id}>
               {/* In-feed ad after the 6th card */}
