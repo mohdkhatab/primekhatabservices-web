@@ -868,7 +868,7 @@ async function mcpTokenEndpoint(db: SupabaseClient, req: Request): Promise<Respo
 function oauthProtectedResource(): Response {
   return json({
     resource: `${OAUTH_ISSUER}/mcp`,
-    authorization_servers: [OAUTH_ISSUER],
+    authorization_servers: ["https://www.primekhatab.in"],
     bearer_methods_supported: ["header"],
     scopes_supported: ["admin"],
   });
@@ -1302,7 +1302,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
             401,
             {
               "WWW-Authenticate":
-                `Bearer resource_metadata="${OAUTH_ISSUER}/.well-known/oauth-protected-resource", scope="admin"`,
+                `Bearer resource_metadata="https://www.primekhatab.in/.well-known/oauth-protected-resource", scope="admin"`,
             },
           );
         }
