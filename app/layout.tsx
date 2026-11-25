@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
+import PushPrompt from "@/components/PushPrompt";
 
 // One font only (UI_SPEC): Inter, self-hosted/optimized by next/font.
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -119,6 +120,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="mx-auto min-h-[60vh] max-w-6xl px-4 py-8">{children}</main>
         <Footer />
         <CookieConsent />
+        <PushPrompt />
       </body>
     </html>
   );

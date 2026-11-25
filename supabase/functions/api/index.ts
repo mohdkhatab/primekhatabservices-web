@@ -334,6 +334,7 @@ async function createDeal(db: SupabaseClient, req: Request): Promise<Response> {
     DEAL_COLUMNS,
   ).single();
   if (dbError) return error(dbError.message, 500);
+  if (data) notifyNewDeal(db, data as Record<string, unknown>);
   return json({ deal: data }, 201);
 }
 
@@ -398,6 +399,266 @@ async function createCategory(
   return listCategories(db);
 }
 
+// ---------------------------------------------------------- web push ----
+// Browser push notifications (RFC 8291 aes128gcm + VAPID ES256), implemented
+// with WebCrypto only — no external dependency. Secrets: VAPID_PUBLIC_KEY,
+// VAPID_PRIVATE_KEY, VAPID_SUBJECT.
+
+function bytesToB64url(bytes: Uint8Array): string {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function vapidJwt(audience: string): Promise<string> {
+  const pub = b64urlToBytes(Deno.env.get("VAPID_PUBLIC_KEY") ?? "");
+  const jwk = {
+    kty: "EC",
+    crv: "P-256",
+    x: bytesToB64url(pub.slice(1, 33)),
+    y: bytesToB64url(pub.slice(33, 65)),
+    d: Deno.env.get("VAPID_PRIVATE_KEY") ?? "",
+  };
+  const key = await crypto.subtle.importKey(
+    "jwk",
+    jwk,
+    { name: "ECDSA", namedCurve: "P-256" },
+    false,
+    ["sign"],
+  );
+  const header = bytesToB64url(
+    new TextEncoder().encode(JSON.stringify({ typ: "JWT", alg: "ES256" })),
+  );
+  const payload = bytesToB64url(
+    new TextEncoder().encode(
+      JSON.stringify({
+        aud: audience,
+        exp: Math.floor(Date.now() / 1000) + 12 * 3600,
+        sub: Deno.env.get("VAPID_SUBJECT") ?? "mailto:startup@primekhatab.in",
+      }),
+    ),
+  );
+  const sig = await crypto.subtle.sign(
+    { name: "ECDSA", hash: "SHA-256" },
+    key,
+    new TextEncoder().encode(`${header}.${payload}`),
+  );
+  return `${header}.${payload}.${bytesToB64url(new Uint8Array(sig))}`;
+}
+
+async function hmacSha256(keyBytes: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyBytes as BufferSource,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  return new Uint8Array(await crypto.subtle.sign("HMAC", key, data as BufferSource));
+}
+
+async function hkdfExpand(prk: Uint8Array, info: Uint8Array, length: number): Promise<Uint8Array> {
+  const out = new Uint8Array(length);
+  let t = new Uint8Array(0);
+  let offset = 0;
+  let counter = 1;
+  while (offset < length) {
+    const input = new Uint8Array(t.length + info.length + 1);
+    input.set(t);
+    input.set(info, t.length);
+    input[input.length - 1] = counter++;
+    t = await hmacSha256(prk, input);
+    out.set(t.subarray(0, Math.min(t.length, length - offset)), offset);
+    offset += t.length;
+  }
+  return out;
+}
+
+function concatBytes(...parts: Uint8Array[]): Uint8Array {
+  const total = parts.reduce((n, p) => n + p.length, 0);
+  const out = new Uint8Array(total);
+  let o = 0;
+  for (const p of parts) {
+    out.set(p, o);
+    o += p.length;
+  }
+  return out;
+}
+
+async function encryptPushPayload(
+  p256dhB64: string,
+  authB64: string,
+  payload: string,
+): Promise<{ body: Uint8Array; serverPublic: Uint8Array }> {
+  const uaPublic = b64urlToBytes(p256dhB64);
+  const authSecret = b64urlToBytes(authB64);
+
+  const uaKey = await crypto.subtle.importKey(
+    "raw",
+    uaPublic as BufferSource,
+    { name: "ECDH", namedCurve: "P-256" },
+    false,
+    [],
+  );
+  const serverPair = await crypto.subtle.generateKey(
+    { name: "ECDH", namedCurve: "P-256" },
+    true,
+    ["deriveBits"],
+  );
+  const shared = new Uint8Array(
+    await crypto.subtle.deriveBits(
+      { name: "ECDH", public: uaKey },
+      serverPair.privateKey,
+      256,
+    ),
+  );
+  const serverJwk = await crypto.subtle.exportKey("jwk", serverPair.publicKey);
+  const serverPublic = concatBytes(
+    new Uint8Array([4]),
+    b64urlToBytes(serverJwk.x ?? ""),
+    b64urlToBytes(serverJwk.y ?? ""),
+  );
+
+  // RFC 8291 key derivation
+  const info = concatBytes(
+    new TextEncoder().encode("WebPush: info\0"),
+    uaPublic,
+    serverPublic,
+  );
+  const prkKey = await hmacSha256(authSecret, shared);
+  const ikm = await hkdfExpand(prkKey, info, 32);
+
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const prk = await hmacSha256(salt, ikm);
+  const cek = await hkdfExpand(
+    prk,
+    new TextEncoder().encode("Content-Encoding: aes128gcm\0"),
+    16,
+  );
+  const nonce = await hkdfExpand(
+    prk,
+    new TextEncoder().encode("Content-Encoding: nonce\0"),
+    12,
+  );
+
+  const aesKey = await crypto.subtle.importKey("raw", cek as BufferSource, "AES-GCM", false, [
+    "encrypt",
+  ]);
+  const plaintext = concatBytes(new TextEncoder().encode(payload), new Uint8Array([2]));
+  const ciphertext = new Uint8Array(
+    await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: nonce as BufferSource },
+      aesKey,
+      plaintext as BufferSource,
+    ),
+  );
+
+  const rs = new Uint8Array(4);
+  new DataView(rs.buffer).setUint32(0, 4096);
+  const body = concatBytes(
+    salt,
+    rs,
+    new Uint8Array([serverPublic.length]),
+    serverPublic,
+    ciphertext,
+  );
+  return { body, serverPublic };
+}
+
+type PushSub = { endpoint: string; p256dh: string; auth: string };
+
+async function sendPush(sub: PushSub, payload: string): Promise<number> {
+  const audience = new URL(sub.endpoint).origin;
+  const jwt = await vapidJwt(audience);
+  const { body } = await encryptPushPayload(sub.p256dh, sub.auth, payload);
+  const res = await fetch(sub.endpoint, {
+    method: "POST",
+    headers: {
+      "Authorization": `vapid t=${jwt}, k=${Deno.env.get("VAPID_PUBLIC_KEY")}`,
+      "Content-Encoding": "aes128gcm",
+      "Content-Type": "application/octet-stream",
+      "TTL": "86400",
+    },
+    body: body as BodyInit,
+  });
+  return res.status;
+}
+
+async function sendPushToAll(
+  db: SupabaseClient,
+  message: { title: string; body: string; url: string },
+): Promise<{ sent: number; removed: number; total: number }> {
+  const { data } = await db.from("push_subscriptions").select("endpoint, p256dh, auth");
+  const subs = (data ?? []) as PushSub[];
+  let sent = 0;
+  let removed = 0;
+  const payload = JSON.stringify(message);
+  await Promise.all(
+    subs.map(async (sub) => {
+      try {
+        const status = await sendPush(sub, payload);
+        if (status === 404 || status === 410) {
+          await db.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+          removed++;
+        } else if (status >= 200 && status < 300) {
+          sent++;
+        }
+      } catch {
+        // one bad subscription must not fail the batch
+      }
+    }),
+  );
+  return { sent, removed, total: subs.length };
+}
+
+function notifyNewDeal(db: SupabaseClient, deal: Record<string, unknown>): void {
+  const message = {
+    title: `New deal: ${deal.brand}`,
+    body: deal.code
+      ? `${deal.title} — use code ${deal.code}`
+      : String(deal.title ?? ""),
+    url: `https://www.primekhatab.in/deal/${deal.id}`,
+  };
+  const work = sendPushToAll(db, message).catch((e) =>
+    console.error("push notify failed:", e)
+  );
+  // Keep the function alive until sends finish, without blocking the response.
+  const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } })
+    .EdgeRuntime;
+  if (rt?.waitUntil) rt.waitUntil(work);
+}
+
+async function subscribePush(db: SupabaseClient, req: Request): Promise<Response> {
+  const body = await readJsonBody(req);
+  if (!body) return error("Request body must be a JSON object", 400);
+  const endpoint = body.endpoint;
+  const keys = body.keys as { p256dh?: unknown; auth?: unknown } | undefined;
+  if (
+    typeof endpoint !== "string" || !endpoint.startsWith("https://") ||
+    typeof keys?.p256dh !== "string" || typeof keys?.auth !== "string"
+  ) {
+    return error("Invalid push subscription", 400);
+  }
+  const { error: dbError } = await db.from("push_subscriptions").upsert(
+    { endpoint, p256dh: keys.p256dh, auth: keys.auth },
+    { onConflict: "endpoint" },
+  );
+  if (dbError) return error(dbError.message, 500);
+  return json({ ok: true });
+}
+
+async function notifyPush(db: SupabaseClient, req: Request): Promise<Response> {
+  const body = await readJsonBody(req);
+  if (!body) return error("Request body must be a JSON object", 400);
+  const message = {
+    title: typeof body.title === "string" ? body.title : "Prime Khatab Deals",
+    body: typeof body.body === "string" ? body.body : "A new deal is live.",
+    url: typeof body.url === "string" ? body.url : "https://www.primekhatab.in/",
+  };
+  const result = await sendPushToAll(db, message);
+  return json({ ok: true, ...result });
+}
+
 // -------------------------------------------------------------- server ----
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -443,6 +704,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
       if (req.method === "DELETE") {
         if (!(await isAdmin(req))) return unauthorized();
         return deleteDeal(db, id);
+      }
+    }
+    if (resource === "push" && segments.length === 2 && segments[1] === "subscribe") {
+      if (req.method === "POST") return subscribePush(db, req);
+    }
+    if (resource === "push" && segments.length === 2 && segments[1] === "notify") {
+      if (req.method === "POST") {
+        if (!(await isAdmin(req))) return unauthorized();
+        return notifyPush(db, req);
       }
     }
     if (resource === "categories" && segments.length === 1) {
