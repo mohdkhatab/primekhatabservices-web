@@ -1,34 +1,25 @@
 import Link from "next/link";
-import { DEAL_TYPES, getCategoryNames, getDeals } from "@/lib/deals";
+import { DEAL_TYPES, getCategoryNames } from "@/lib/deals";
 import HeaderSearch from "./HeaderSearch";
 import HeaderMenu from "./HeaderMenu";
 import SiteLogo from "./SiteLogo";
 
 /**
- * Sticky header — LEFT: three-dots button opening the category drawer,
- * then the logo + wordmark. CENTER: search. RIGHT: Submit a Deal pill.
+ * Sticky header — plain white bar with a thin bottom border.
+ * LEFT: three-dots menu button (opens the category drawer), then the
+ * logo + wordmark. RIGHT: search + a plain Submit a Deal button.
  * On mobile the search moves to its own row under the top bar.
  */
-export default async function Header() {
-  const deals = await getDeals();
-  const categories = getCategoryNames().map((name) => ({
-    name,
-    count: deals.filter((d) => d.category === name).length,
-  }));
-  const types = DEAL_TYPES.map((name) => ({
-    name,
-    count: deals.filter((d) => d.type === name).length,
-  }));
-
+export default function Header() {
   return (
-    <header className="sticky top-0 z-40 border-b border-blue-100 bg-white/90 shadow-[0_10px_36px_-20px_rgba(29,78,216,0.35)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2.5 px-4 py-3">
-        <HeaderMenu categories={categories} types={types} />
+        <HeaderMenu categories={getCategoryNames()} types={[...DEAL_TYPES]} />
 
-        <Link href="/" className="group flex shrink-0 items-center gap-2.5">
-          <SiteLogo className="h-10 w-10 transition-transform duration-300 group-hover:scale-105" />
-          <span className="font-display text-lg font-extrabold tracking-tight text-slate-900">
-            Prime Khatab <span className="text-gradient">Deals</span>
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
+          <SiteLogo className="h-9 w-9" />
+          <span className="font-display text-lg font-bold tracking-tight text-slate-900">
+            Prime Khatab <span className="text-brand-600">Deals</span>
           </span>
         </Link>
 
@@ -38,15 +29,9 @@ export default async function Header() {
 
         <Link
           href="/submit-deal"
-          className="btn-shine relative order-2 ml-auto hidden shrink-0 overflow-hidden rounded-full bg-gradient-to-r from-brand-600 to-blue-700 px-5 py-2.5 font-display text-sm font-bold text-white shadow-glow transition-all duration-300 hover:scale-[1.03] hover:brightness-110 active:scale-95 sm:order-3 sm:ml-0 md:block"
+          className="order-2 ml-auto hidden shrink-0 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 sm:order-3 sm:ml-0 md:block"
         >
           Submit a Deal
-        </Link>
-        <Link
-          href="/submit-deal"
-          className="order-2 ml-auto shrink-0 rounded-full bg-gradient-to-r from-brand-600 to-blue-700 px-4 py-2 font-display text-sm font-bold text-white shadow-glow transition active:scale-95 sm:order-3 sm:ml-0 md:hidden"
-        >
-          Submit
         </Link>
       </div>
     </header>

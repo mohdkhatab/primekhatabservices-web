@@ -8,9 +8,12 @@ import {
   getDealsByCategory,
 } from "@/lib/deals";
 import DealCard from "@/components/DealCard";
-import AdSlot from "@/components/AdSlot";
+import EmptyState from "@/components/EmptyState";
 
 export const dynamic = "force-dynamic";
+
+const OG_IMAGE =
+  "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/og-image.jpg";
 
 export function generateStaticParams() {
   return getCategoryNames().map((c) => ({ slug: categorySlug(c) }));
@@ -24,7 +27,7 @@ export async function generateMetadata({
   const category = categoryFromSlug(params.slug);
   if (!category) return { title: "Category not found" };
   const title = `${category} — Free Offers & Promo Codes`;
-  const description = `Best free offers, promo codes and deals in ${category}. Checked and updated daily on Prime Khatab Deals — no login, copy the code and save.`;
+  const description = `Free offers, promo codes and deals in ${category}. Updated on Prime Khatab Deals — no login, copy the code and save.`;
   return {
     title,
     description,
@@ -34,13 +37,13 @@ export async function generateMetadata({
       description,
       url: `https://primekhatab.in/category/${params.slug}`,
       type: "website",
-      images: [{ url: "https://primekhatab.inhttps://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/og-image.jpg", width: 1200, height: 630, alt: "Prime Khatab Deals" }],
+      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Prime Khatab Deals" }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ["https://primekhatab.inhttps://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/og-image.jpg"],
+      images: [OG_IMAGE],
     },
   };
 }
@@ -80,29 +83,23 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <nav className="text-sm text-slate-500">
+      <nav className="text-[13px] text-slate-500">
         <Link href="/" className="hover:text-brand-600">Home</Link> /{" "}
         <Link href="/categories" className="hover:text-brand-600">Categories</Link> /{" "}
-        <span className="font-semibold text-slate-900">{category}</span>
+        <span className="font-medium text-slate-900">{category}</span>
       </nav>
-      <div className="mt-4 rounded-3xl bg-blue-50 px-6 py-8">
-        <h1 className="font-display text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
-          {category} — <span className="text-gradient">Free Offers &amp; Promo Codes</span>
-        </h1>
-        <p className="mt-2 max-w-2xl text-slate-500">
-          {deals.length} live deal{deals.length === 1 ? "" : "s"} in {category}. Copy the promo code,
-          tap Get Deal, and save.
-        </p>
-      </div>
-      <AdSlot placement="top" className="my-6" />
+
+      <h1 className="mt-3 text-2xl font-bold text-slate-900">{category}</h1>
+      <p className="mt-1 text-sm text-slate-500">
+        Free offers, promo codes and deals in {category}.
+      </p>
+
       {deals.length === 0 ? (
-        <p className="animate-fade-in rounded-2xl border border-blue-100 bg-blue-50/50 p-8 text-center text-slate-500">
-          No live deals in this category right now — check back soon, new deals are added regularly.
-        </p>
+        <EmptyState />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {deals.map((d, i) => (
-            <DealCard key={d.id} deal={d} index={i} />
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {deals.map((d) => (
+            <DealCard key={d.id} deal={d} />
           ))}
         </div>
       )}

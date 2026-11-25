@@ -4,32 +4,47 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { categorySlug } from "@/lib/deals";
 
-export type MenuCategory = { name: string; count: number };
-export type MenuType = { name: string; count: number };
-
 const QUICK_LINKS = [
   { label: "Home", href: "/" },
-  { label: "All Categories", href: "/categories" },
+  { label: "Categories", href: "/categories" },
   { label: "About", href: "/about" },
   { label: "Submit a Deal", href: "/submit-deal" },
   { label: "Privacy Policy", href: "/privacy" },
-  { label: "Terms of Use", href: "/terms" },
+  { label: "Terms", href: "/terms" },
 ];
 
+function Row({ href, label, onClick }: { href: string; label: string; onClick: () => void }) {
+  return (
+    <li>
+      <Link
+        href={href}
+        onClick={onClick}
+        className="flex min-h-[44px] items-center justify-between px-5 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600"
+      >
+        <span>{label}</span>
+        <span aria-hidden className="text-slate-300">
+          ›
+        </span>
+      </Link>
+    </li>
+  );
+}
+
 /**
- * HeaderMenu — three-dots (⋮) button on the LEFT of the header.
- * Opens a left slide-in drawer with ALL categories (real deal counts),
- * deal types and quick links. Closes on backdrop click, Escape, or
- * after any link is tapped. Works on mobile and desktop.
+ * HeaderMenu — plain three-dots button on the LEFT of the header.
+ * Opens a left slide-in drawer with all categories (plain list, no
+ * counts), deal types and page links. Closes on backdrop click,
+ * Escape, or after any link is tapped.
  */
 export default function HeaderMenu({
   categories,
   types,
 }: {
-  categories: MenuCategory[];
-  types: MenuType[];
+  categories: string[];
+  types: string[];
 }) {
   const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
 
   useEffect(() => {
     if (!open) return;
@@ -51,18 +66,22 @@ export default function HeaderMenu({
         onClick={() => setOpen(true)}
         aria-haspopup="true"
         aria-expanded={open}
-        aria-label="Open menu — all categories"
+        aria-label="Open menu"
         data-menu-button="three-dots"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-blue-200 bg-white text-xl font-extrabold leading-none text-brand-700 transition-all duration-200 hover:border-blue-400 hover:bg-blue-50 active:scale-95"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
       >
-        ⋮
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <circle cx="12" cy="5" r="1.8" />
+          <circle cx="12" cy="12" r="1.8" />
+          <circle cx="12" cy="19" r="1.8" />
+        </svg>
       </button>
 
       {/* Backdrop */}
       <div
         aria-hidden
-        onClick={() => setOpen(false)}
-        className={`fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[2px] transition-opacity duration-300 ${
+        onClick={close}
+        className={`fixed inset-0 z-50 bg-slate-900/40 transition-opacity ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
@@ -70,82 +89,56 @@ export default function HeaderMenu({
       {/* Left drawer */}
       <aside
         aria-hidden={!open}
-        className={`fixed inset-y-0 left-0 z-50 flex w-[86vw] max-w-xs flex-col bg-white shadow-lift transition-transform duration-300 ease-out ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[300px] max-w-[86vw] flex-col border-r border-slate-200 bg-white transition-transform duration-200 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-blue-100 px-5 py-4">
-          <span className="font-display text-base font-extrabold tracking-tight text-slate-900">
-            Prime Khatab <span className="text-gradient">Deals</span>
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5">
+          <span className="font-display text-base font-bold text-slate-900">
+            Prime Khatab <span className="text-brand-600">Deals</span>
           </span>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={close}
             aria-label="Close menu"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-blue-100 text-lg leading-none text-slate-500 transition hover:bg-blue-50 hover:text-brand-700"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-lg leading-none text-slate-500 hover:bg-slate-50"
           >
             ×
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-4">
-          <p className="px-2 pb-1 text-[11px] font-extrabold uppercase tracking-[0.15em] text-slate-400">
+        <div className="flex-1 overflow-y-auto py-3">
+          <p className="px-5 pb-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
             All Categories
           </p>
           <ul>
-            {categories.map((c) => (
-              <li key={c.name}>
-                <Link
-                  href={`/category/${categorySlug(c.name)}`}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between gap-3 rounded-xl px-2 py-2 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 hover:text-brand-700"
-                >
-                  <span>{c.name}</span>
-                  <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-brand-700 ring-1 ring-blue-100">
-                    {c.count}
-                  </span>
-                </Link>
-              </li>
+            {categories.map((name) => (
+              <Row key={name} href={`/category/${categorySlug(name)}`} label={name} onClick={close} />
             ))}
           </ul>
 
-          <p className="px-2 pb-1 pt-5 text-[11px] font-extrabold uppercase tracking-[0.15em] text-slate-400">
+          <p className="px-5 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-slate-400">
             Deal Types
           </p>
-          <div className="flex flex-wrap gap-1.5 px-2">
-            {types.map((t) => (
-              <Link
-                key={t.name}
-                href={`/?type=${encodeURIComponent(t.name)}#all-deals`}
-                onClick={() => setOpen(false)}
-                className="rounded-full bg-blue-50 px-3 py-1.5 text-[13px] font-bold text-brand-700 ring-1 ring-blue-100 transition hover:bg-blue-100"
-              >
-                #{t.name}
-                <span className="ml-1 font-semibold text-slate-400">{t.count}</span>
-              </Link>
+          <ul>
+            {types.map((name) => (
+              <Row
+                key={name}
+                href={`/?type=${encodeURIComponent(name)}`}
+                label={name}
+                onClick={close}
+              />
             ))}
-          </div>
+          </ul>
 
-          <p className="px-2 pb-1 pt-5 text-[11px] font-extrabold uppercase tracking-[0.15em] text-slate-400">
-            Quick Links
+          <p className="px-5 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Pages
           </p>
           <ul>
             {QUICK_LINKS.map((l) => (
-              <li key={l.href}>
-                <Link
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="block rounded-xl px-2 py-2 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 hover:text-brand-700"
-                >
-                  {l.label}
-                </Link>
-              </li>
+              <Row key={l.href} href={l.href} label={l.label} onClick={close} />
             ))}
           </ul>
-        </div>
-
-        <div className="border-t border-blue-100 px-5 py-3 text-xs text-slate-400">
-          Free offers &amp; promo codes — no login needed.
         </div>
       </aside>
     </>

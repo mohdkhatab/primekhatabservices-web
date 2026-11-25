@@ -30,10 +30,10 @@ export default function SubmitDealPage() {
   }
 
   const inputCls =
-    "w-full rounded-xl border border-blue-200 bg-white px-3 py-2.5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:shadow-glow";
+    "w-full rounded-xl border border-blue-200 bg-white px-3 py-2.5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 ";
 
   return (
-    <div className="mx-auto max-w-xl animate-fade-up">
+    <div className="mx-auto max-w-xl">
       <h1 className="font-display text-3xl font-extrabold text-slate-900">Submit a Deal</h1>
       <p className="mt-2 text-slate-500">
         Fill this form — it opens your email app with everything ready to send to
@@ -74,7 +74,7 @@ export default function SubmitDealPage() {
           <label className="mb-1 block text-sm font-bold text-slate-700">Short description</label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} className={inputCls} rows={3} placeholder="What does the user get? Any conditions?" />
         </div>
-        <button type="submit" className="btn-shine relative w-full overflow-hidden rounded-full bg-gradient-to-r from-brand-500 to-blue-500 py-3 font-display font-bold text-white shadow-glow transition-all duration-300 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]">
+        <button type="submit" className="h-11 w-full rounded-lg bg-brand-600 text-sm font-semibold text-white hover:bg-brand-700">
           Send Deal via Email →
         </button>
       </form>

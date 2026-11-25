@@ -2,15 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes gradient-x {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-@keyframes shine {
-  0% { transform: translateX(-150%) skewX(-20deg); }
-  100% { transform: translateX(250%) skewX(-20deg); }
-}
-
 html {
   scroll-behavior: smooth;
 }
@@ -20,33 +11,13 @@ body {
   color: #0f172a;
 }
 
-/* Animated royal-blue gradient text (blue-600 -> blue-500 -> sky-500) */
-.text-gradient {
-  background: linear-gradient(90deg, #2563eb, #3b82f6, #0ea5e9, #2563eb);
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradient-x 6s ease infinite;
-}
-
-/* Shine sweep for premium buttons/badges (parent needs overflow-hidden) */
-.btn-shine::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 40%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-  transform: translateX(-150%) skewX(-20deg);
-  pointer-events: none;
-}
-.btn-shine:hover::after {
-  animation: shine 0.9s ease;
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
 
 ::selection {
-  background: #bfdbfe;
+  background: #dbeafe;
   color: #1e3a8a;
 }
 
@@ -55,18 +26,9 @@ body {
   width: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #bfdbfe;
+  background: #cbd5e1;
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #60a5fa;
-}
-
-/* Hide scrollbars on horizontal deal rails while keeping scroll */
-.rail-scroll {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.rail-scroll::-webkit-scrollbar {
-  display: none;
+  background: #94a3b8;
 }

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="max-w-3xl animate-fade-up">
+    <div className="max-w-3xl">
       <h1 className="font-display text-3xl font-extrabold text-slate-900">About Prime Khatab Deals</h1>
       <p className="mt-4 leading-relaxed text-slate-600">
         Prime Khatab Deals is run by <strong className="text-brand-600">Prime Khatab Services</strong> (Rajouri, Jammu &amp; Kashmir, India).

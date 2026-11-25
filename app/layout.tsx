@@ -1,20 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, Sora } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import AnnouncementBar from "@/components/AnnouncementBar";
 import CookieConsent from "@/components/CookieConsent";
-import { getDeals } from "@/lib/deals";
 
-// Premium fonts, self-hosted/optimized by next/font (no layout shift, fast).
+// One font only (UI_SPEC): Inter, self-hosted/optimized by next/font.
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const display = Sora({
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  variable: "--font-display",
-  display: "swap",
-});
 
 const SITE_URL = "https://primekhatab.in";
 const OG_IMAGE = `https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/og-image.jpg`;
@@ -100,11 +92,9 @@ const organizationJsonLd = {
   email: "startup@primekhatab.in",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const deals = await getDeals();
-  const featuredDeal = deals.find((d) => d.featured) ?? deals[0];
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${display.variable}`}>
+    <html lang="en" className={inter.variable}>
       <head>
         {/* Favicon set in public/ — declared explicitly because the app/icon.png
             file convention otherwise replaces the metadata icons output. */}
@@ -125,7 +115,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Ad network scripts go here when approved, e.g. Google AdSense:
             <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXX" crossOrigin="anonymous" />
             HilltopAds: paste the site verification / zone script here. */}
-        {featuredDeal && <AnnouncementBar deal={featuredDeal} />}
         <Header />
         <main className="mx-auto min-h-[60vh] max-w-6xl px-4 py-8">{children}</main>
         <Footer />

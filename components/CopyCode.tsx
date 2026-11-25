@@ -16,9 +16,9 @@ async function copyText(text: string): Promise<void> {
 }
 
 /**
- * CopyCode — two shapes:
- *  - default: dashed code box with the code + a Copy button (detail page, hero)
- *  - variant="button": a single compact pill button for card footers
+ * CopyCode — two shapes (UI_SPEC: flat buttons only, hover = darker blue):
+ *  - default: dashed code box with the code + a Copy button (detail page)
+ *  - variant="button": a single compact primary button for card footers
  */
 export default function CopyCode({
   code,
@@ -33,8 +33,8 @@ export default function CopyCode({
   if (!code) {
     if (variant === "button") return null;
     return (
-      <p className={`font-semibold text-brand-600 ${large ? "text-base" : "text-sm"}`}>
-        ✓ No code needed — just open the deal
+      <p className={`font-medium text-slate-600 ${large ? "text-base" : "text-sm"}`}>
+        No code needed — just open the deal
       </p>
     );
   }
@@ -51,26 +51,18 @@ export default function CopyCode({
         type="button"
         onClick={copy}
         aria-label={`Copy promo code ${code}`}
-        className={`rounded-full px-4 py-2 font-display text-sm font-bold transition-all duration-300 hover:scale-[1.03] active:scale-95 ${
-          copied
-            ? "animate-pop bg-blue-700 text-white"
-            : "bg-gradient-to-r from-brand-600 to-blue-700 text-white shadow-glow hover:brightness-110"
-        }`}
+        className="h-10 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700"
       >
-        {copied ? "Copied ✓" : "Copy Code"}
+        {copied ? "Copied" : "Copy Code"}
       </button>
     );
   }
 
   return (
-    <div
-      className={`flex items-stretch overflow-hidden rounded-xl border-2 border-dashed transition-all duration-300 ${
-        copied ? "border-blue-500 bg-blue-50" : "border-blue-300 bg-blue-50/60"
-      }`}
-    >
+    <div className="flex items-stretch overflow-hidden rounded-lg border border-dashed border-slate-300 bg-slate-50">
       <span
-        className={`flex flex-1 items-center px-3 font-mono font-bold tracking-wider text-brand-700 ${
-          large ? "py-3 text-lg" : "py-2 text-sm"
+        className={`flex flex-1 items-center px-3 font-mono font-bold tracking-wider text-slate-900 ${
+          large ? "py-3 text-base" : "py-2 text-sm"
         }`}
       >
         {code}
@@ -79,13 +71,9 @@ export default function CopyCode({
         type="button"
         onClick={copy}
         aria-label={`Copy promo code ${code}`}
-        className={`px-3 text-sm font-bold transition-all duration-300 hover:scale-[1.04] active:scale-95 ${
-          copied
-            ? "animate-pop bg-blue-700 text-white"
-            : "bg-white/70 text-brand-600 ring-1 ring-inset ring-blue-300 hover:bg-gradient-to-r hover:from-brand-600 hover:to-blue-700 hover:text-white"
-        }`}
+        className="bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700"
       >
-        {copied ? "Copied ✓" : "Copy Code"}
+        {copied ? "Copied" : "Copy"}
       </button>
     </div>
   );

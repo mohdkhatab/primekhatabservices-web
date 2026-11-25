@@ -32,13 +32,13 @@ export default function ShareButton({ title }: { title?: string }) {
     <button
       type="button"
       onClick={share}
-      className={`rounded-full px-5 py-2.5 font-display text-sm font-bold transition-all duration-300 hover:scale-105 active:scale-95 ${
+      className={`flex h-10 items-center rounded-lg px-4 text-sm font-semibold ${
         copied
-          ? "animate-pop bg-blue-700 text-white shadow-glow"
-          : "border border-blue-300 bg-white text-brand-600 hover:bg-blue-50"
+          ? "bg-brand-600 text-white hover:bg-brand-700"
+          : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
       }`}
     >
-      {copied ? "Link Copied ✓" : "↗ Share"}
+      {copied ? "Link Copied" : "Share"}
     </button>
   );
 }

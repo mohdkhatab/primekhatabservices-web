@@ -145,7 +145,7 @@ export default function AdminPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="font-display text-3xl font-extrabold tracking-tight text-slate-900">
-        Admin — <span className="text-gradient">Add a Deal</span>
+        Admin — Add a Deal
       </h1>
       <p className="mt-2 text-sm leading-relaxed text-slate-500">
         Posts straight to the live deals API. Paste a real <strong>logo image link</strong> and a{" "}
@@ -155,7 +155,7 @@ export default function AdminPage() {
 
       <form onSubmit={submit} className="mt-8 space-y-8">
         {/* Connection */}
-        <section className="rounded-3xl border border-blue-100 bg-blue-50/50 p-5 shadow-card sm:p-6">
+        <section className="rounded-lg border border-slate-200 bg-slate-50 p-5 sm:p-6">
           <h2 className="font-display text-base font-bold text-slate-900">Connection</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
@@ -178,7 +178,7 @@ export default function AdminPage() {
         </section>
 
         {/* Deal basics */}
-        <section className="rounded-3xl border border-blue-100 bg-white p-5 shadow-card sm:p-6">
+        <section className="rounded-lg border border-slate-200 bg-white p-5 sm:p-6">
           <h2 className="font-display text-base font-bold text-slate-900">Deal Details</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
@@ -237,7 +237,7 @@ export default function AdminPage() {
         </section>
 
         {/* Images */}
-        <section className="rounded-3xl border border-blue-100 bg-white p-5 shadow-card sm:p-6">
+        <section className="rounded-lg border border-slate-200 bg-white p-5 sm:p-6">
           <h2 className="font-display text-base font-bold text-slate-900">Images</h2>
           <div className="mt-4 grid gap-5 sm:grid-cols-2">
             <div>
@@ -288,7 +288,7 @@ export default function AdminPage() {
         <button
           type="submit"
           disabled={busy}
-          className="btn-shine relative w-full overflow-hidden rounded-full bg-gradient-to-r from-brand-600 to-blue-700 py-3.5 font-display font-bold text-white shadow-glow transition-all duration-300 hover:scale-[1.01] hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-11 w-full rounded-lg bg-brand-600 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {busy ? "Posting…" : "Add Deal →"}
         </button>
