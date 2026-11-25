@@ -36,12 +36,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   icons: {
     icon: [
-      { url: "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon.ico", sizes: "any" },
-      { url: "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-16x16.png", type: "image/png", sizes: "16x16" },
-      { url: "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-v2.ico", sizes: "any" },
+      { url: "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-16-v2.png", type: "image/png", sizes: "16x16" },
+      { url: "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-32-v2.png", type: "image/png", sizes: "32x32" },
     ],
-    apple: [{ url: "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
-    shortcut: ["https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon.ico"],
+    apple: [{ url: "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/apple-touch-icon-v2.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-v2.ico"],
   },
   openGraph: {
     type: "website",
@@ -87,7 +87,7 @@ const organizationJsonLd = {
   "@type": "Organization",
   name: "Prime Khatab Services",
   url: SITE_URL,
-  logo: `https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/logo.png`,
+  logo: `https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/logo-v2.png`,
   brand: { "@type": "Brand", name: "Prime Khatab Deals" },
   email: "startup@primekhatab.in",
 };
@@ -98,10 +98,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Favicon set in public/ — declared explicitly because the app/icon.png
             file convention otherwise replaces the metadata icons output. */}
-        <link rel="icon" href="https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon.ico" sizes="any" />
-        <link rel="icon" type="image/png" sizes="16x16" href="https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-16x16.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-32x32.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/apple-touch-icon.png" />
+        <link rel="icon" href="https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-v2.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="16x16" href="https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-16-v2.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/favicon-32-v2.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/apple-touch-icon-v2.png" />
       </head>
       <body className="bg-white font-sans text-slate-800 antialiased">
         <script

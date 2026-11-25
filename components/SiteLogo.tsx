@@ -21,7 +21,7 @@ export default function SiteLogo({ className = "h-9 w-9" }: { className?: string
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/logo.png"
+      src="https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/logo-v2.png"
       alt="Prime Khatab Deals logo"
       onError={() => setFailed(true)}
       className={`shrink-0 rounded-lg object-contain ${className}`}

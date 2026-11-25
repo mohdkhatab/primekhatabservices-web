@@ -68,13 +68,14 @@ export default function HeaderMenu({
         aria-expanded={open}
         aria-label="Open menu"
         data-menu-button="three-dots"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+        className="flex h-11 shrink-0 items-center gap-2 rounded-lg border-2 border-brand-600 bg-white px-3 text-brand-700 hover:bg-blue-50"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <circle cx="12" cy="5" r="1.8" />
-          <circle cx="12" cy="12" r="1.8" />
-          <circle cx="12" cy="19" r="1.8" />
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <circle cx="12" cy="4.5" r="2.5" />
+          <circle cx="12" cy="12" r="2.5" />
+          <circle cx="12" cy="19.5" r="2.5" />
         </svg>
+        <span className="text-sm font-semibold">Menu</span>
       </button>
 
       {/* Backdrop */}
