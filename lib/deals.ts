@@ -147,8 +147,11 @@ export function formatDate(iso?: string): string {
  * 3. Fallback → data/deals.json (local/dev).
  * Expired deals are filtered out in all cases.
  */
+const DEFAULT_API_BASE =
+  "https://pkvglyflccxwfkfipfvc.supabase.co/functions/v1/api";
+
 function apiBase(): string | null {
-  const base = process.env.NEXT_PUBLIC_API_BASE;
+  const base = process.env.NEXT_PUBLIC_API_BASE || DEFAULT_API_BASE;
   return base ? base.replace(/\/$/, "") : null;
 }
 
