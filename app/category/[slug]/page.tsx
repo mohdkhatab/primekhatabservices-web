@@ -35,7 +35,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: `https://primekhatab.in/category/${params.slug}`,
+      url: `https://www.primekhatab.in/category/${params.slug}`,
       type: "website",
       images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Prime Khatab Deals" }],
     },
@@ -60,7 +60,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     itemListElement: deals.map((d, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `https://primekhatab.in/deal/${d.id}`,
+      url: `https://www.primekhatab.in/deal/${d.id}`,
       name: d.title,
     })),
   };
@@ -68,13 +68,13 @@ export default async function CategoryPage({ params }: { params: { slug: string 
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://primekhatab.in/" },
-      { "@type": "ListItem", position: 2, name: "Categories", item: "https://primekhatab.in/categories" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.primekhatab.in/" },
+      { "@type": "ListItem", position: 2, name: "Categories", item: "https://www.primekhatab.in/categories" },
       {
         "@type": "ListItem",
         position: 3,
         name: category,
-        item: `https://primekhatab.in/category/${params.slug}`,
+        item: `https://www.primekhatab.in/category/${params.slug}`,
       },
     ],
   };

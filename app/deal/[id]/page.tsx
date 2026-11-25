@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     openGraph: {
       title,
       description: deal.description,
-      url: `https://primekhatab.in/deal/${deal.id}`,
+      url: `https://www.primekhatab.in/deal/${deal.id}`,
       type: "website",
       images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Prime Khatab Deals" }],
     },
@@ -128,7 +128,7 @@ export default async function DealPage({ params }: { params: { id: string } }) {
     "@type": "Offer",
     name: deal.title,
     description: deal.description,
-    url: `https://primekhatab.in/deal/${deal.id}`,
+    url: `https://www.primekhatab.in/deal/${deal.id}`,
     category: deal.category,
     price: "0",
     priceCurrency: "INR",
@@ -149,14 +149,14 @@ export default async function DealPage({ params }: { params: { id: string } }) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://primekhatab.in/" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.primekhatab.in/" },
       {
         "@type": "ListItem",
         position: 2,
         name: deal.category,
-        item: `https://primekhatab.in/category/${categorySlug(deal.category)}`,
+        item: `https://www.primekhatab.in/category/${categorySlug(deal.category)}`,
       },
-      { "@type": "ListItem", position: 3, name: deal.brand, item: `https://primekhatab.in/deal/${deal.id}` },
+      { "@type": "ListItem", position: 3, name: deal.brand, item: `https://www.primekhatab.in/deal/${deal.id}` },
     ],
   };
 

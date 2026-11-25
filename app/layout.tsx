@@ -8,7 +8,7 @@ import CookieConsent from "@/components/CookieConsent";
 // One font only (UI_SPEC): Inter, self-hosted/optimized by next/font.
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
-const SITE_URL = "https://primekhatab.in";
+const SITE_URL = "https://www.primekhatab.in";
 const OG_IMAGE = `https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/og-image.jpg`;
 const SITE_DESCRIPTION =
   "Daily checked free offers, promo codes and deals: coding platforms, hosting, AI tools, shopping, student offers, startup deals, finance apps, travel, food and recharge offers. No login — copy the code and go.";

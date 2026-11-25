@@ -29,7 +29,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/admin"],
       })),
     ],
-    sitemap: "https://primekhatab.in/sitemap.xml",
-    host: "https://primekhatab.in",
+    sitemap: "https://www.primekhatab.in/sitemap.xml",
+    host: "https://www.primekhatab.in",
   };
 }

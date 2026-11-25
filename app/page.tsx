@@ -24,7 +24,7 @@ export default async function HomePage({
     itemListElement: deals.map((d, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `https://primekhatab.in/deal/${d.id}`,
+      url: `https://www.primekhatab.in/deal/${d.id}`,
       name: d.title,
     })),
   };

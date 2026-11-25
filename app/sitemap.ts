@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { categorySlug, getCategoryNames, getDeals } from "@/lib/deals";
 
-const BASE = "https://primekhatab.in";
+const BASE = "https://www.primekhatab.in";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const deals = await getDeals();

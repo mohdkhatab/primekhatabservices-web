@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "Categories — Topics & Deal Types | Prime Khatab Deals",
     description:
       "Browse deals by topic or by deal type — coding, hosting, AI tools, shopping, student offers, startup deals, freebies, credits and promo codes.",
-    url: "https://primekhatab.in/categories",
+    url: "https://www.primekhatab.in/categories",
     type: "website",
     images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Prime Khatab Deals" }],
   },
@@ -43,8 +43,8 @@ export default function CategoriesPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://primekhatab.in/" },
-      { "@type": "ListItem", position: 2, name: "Categories", item: "https://primekhatab.in/categories" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.primekhatab.in/" },
+      { "@type": "ListItem", position: 2, name: "Categories", item: "https://www.primekhatab.in/categories" },
     ],
   };
 
