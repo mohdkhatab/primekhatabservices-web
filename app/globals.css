@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes shine {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  100% { transform: translateX(250%) skewX(-20deg); }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: #1c1917;
+}
+
+/* Animated pink gradient text (pink -> rose -> fuchsia light) */
+.text-gradient {
+  background: linear-gradient(90deg, #ec4899, #f43f5e, #d946ef, #ec4899);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-x 6s ease infinite;
+}
+
+/* Shine sweep for premium buttons/badges (parent needs overflow-hidden) */
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+}
+.btn-shine:hover::after {
+  animation: shine 0.9s ease;
+}
+
+::selection {
+  background: #fbcfe8;
+  color: #831843;
+}
+
+::-webkit-scrollbar {
+  height: 8px;
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #fbcfe8;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f472b6;
+}

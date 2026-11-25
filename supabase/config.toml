@@ -1,0 +1,28 @@
+# Supabase project config — Prime Khatab Deals
+# Docs: https://supabase.com/docs/guides/cli/config
+project_id = "primekhatab-deals"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "https://primekhatab.in"
+
+# Edge Functions
+# verify_jwt = false: the "api" function does its OWN auth —
+# public GET routes need no token, write routes check ADMIN_API_KEY /
+# MCP OAuth token inside the function code (see functions/api/index.ts).
+[functions.api]
+verify_jwt = false
