@@ -123,7 +123,11 @@ export function hasFixedExpiry(deal: Deal): boolean {
 
 /** Fill enrichment defaults so every source (API / Supabase / JSON) renders the same. */
 export function normalizeDeal(deal: Deal): Deal {
-  const raw = deal as Deal & { logo_url?: string; image_url?: string };
+  const raw = deal as Deal & {
+    logo_url?: string;
+    image_url?: string;
+    limited_time?: boolean;
+  };
   return {
     ...deal,
     logoUrl: deal.logoUrl || raw.logo_url || derivedLogoUrl(deal),
@@ -133,7 +137,7 @@ export function normalizeDeal(deal: Deal): Deal {
     clicks: typeof deal.clicks === "number" ? deal.clicks : 0,
     benefits: Array.isArray(deal.benefits) ? deal.benefits : [],
     featured: Boolean(deal.featured),
-    limitedTime: deal.limited_time !== false,
+    limitedTime: raw.limited_time !== false,
   };
 }
 
