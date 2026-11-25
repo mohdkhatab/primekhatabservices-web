@@ -44,10 +44,14 @@ const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
 };
 
-function json(body: unknown, status = 200): Response {
+function json(
+  body: unknown,
+  status = 200,
+  extraHeaders: Record<string, string> = {},
+): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json", ...extraHeaders },
   });
 }
 
@@ -698,54 +702,285 @@ async function issueMcpToken(clientId: string): Promise<string> {
   return `${header}.${payload}.${bytesToB64url(new Uint8Array(sig))}`;
 }
 
-async function mcpTokenEndpoint(req: Request): Promise<Response> {
-  let id = "";
-  let secret = "";
+const OAUTH_ISSUER =
+  "https://pkvglyflccxwfkfipfvc.supabase.co/functions/v1/api";
+
+async function sha256Hex(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text),
+  );
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function randomToken(bytes = 32): string {
+  const arr = new Uint8Array(bytes);
+  crypto.getRandomValues(arr);
+  return bytesToB64url(arr);
+}
+
+async function issueTokenPair(clientId: string) {
+  const access_token = await issueMcpToken(clientId);
+  return { access_token, token_type: "Bearer", expires_in: 3600, scope: "admin" };
+}
+
+async function parseOAuthBody(req: Request): Promise<Record<string, string>> {
+  try {
+    const raw = await req.text();
+    if (!raw) return {};
+    if (raw.trim().startsWith("{")) {
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      const out: Record<string, string> = {};
+      for (const [k, v] of Object.entries(parsed)) {
+        if (typeof v === "string") out[k] = v;
+      }
+      return out;
+    }
+    return Object.fromEntries(new URLSearchParams(raw));
+  } catch {
+    return {};
+  }
+}
+
+function basicAuth(req: Request): { id: string; secret: string } {
   const basic = (req.headers.get("authorization") ?? "").replace(/^Basic /, "");
-  if (basic) {
-    try {
-      const decoded = atob(basic);
-      const idx = decoded.indexOf(":");
-      if (idx > -1) {
-        id = decoded.slice(0, idx);
-        secret = decoded.slice(idx + 1);
-      }
-    } catch {
-      // fall through to body params
+  if (!basic) return { id: "", secret: "" };
+  try {
+    const decoded = atob(basic);
+    const idx = decoded.indexOf(":");
+    if (idx > -1) {
+      const sec = decoded.slice(idx + 1);
+      return { id: decoded.slice(0, idx), secret: sec };
     }
+  } catch {
+    // ignore
   }
-  if (!id) {
-    // Accept JSON or application/x-www-form-urlencoded bodies.
-    let params: Record<string, string> = {};
-    try {
-      const raw = await req.text();
-      if (raw.trim().startsWith("{")) {
-        const parsed = JSON.parse(raw) as Record<string, unknown>;
-        for (const [k, v] of Object.entries(parsed)) {
-          if (typeof v === "string") params[k] = v;
-        }
-      } else {
-        params = Object.fromEntries(new URLSearchParams(raw));
-      }
-    } catch {
-      params = {};
-    }
-    id = params.client_id ?? "";
-    secret = params.client_secret ?? "";
-    if (params.grant_type !== undefined && params.grant_type !== "client_credentials") {
-      return error("unsupported_grant_type", 400);
-    }
-  }
+  return { id: "", secret: "" };
+}
+
+/** Verify a client: the built-in pkd-admin (env) or a DCR-registered client. */
+async function verifyOAuthClient(
+  db: SupabaseClient,
+  id: string,
+  secret: string,
+): Promise<boolean> {
   const wantId = Deno.env.get("MCP_CLIENT_ID") ?? "";
   const wantSecret = Deno.env.get("MCP_CLIENT_SECRET") ?? "";
-  if (
-    !wantId || !wantSecret || !timingSafeEqual(id, wantId) ||
-    !timingSafeEqual(secret, wantSecret)
-  ) {
-    return error("invalid_client", 401);
+  if (wantId && wantSecret && timingSafeEqual(id, wantId)) {
+    return timingSafeEqual(secret, wantSecret);
   }
-  const access_token = await issueMcpToken(id);
-  return json({ access_token, token_type: "Bearer", expires_in: 3600 });
+  if (!id) return false;
+  const { data } = await db.from("oauth_clients").select("client_secret_hash")
+    .eq("client_id", id).maybeSingle();
+  if (!data) return false;
+  const stored = (data as { client_secret_hash: string }).client_secret_hash;
+  if (!stored) return true; // public client (PKCE protects the flow)
+  if (!secret) return false;
+  return timingSafeEqual(await sha256Hex(secret), stored);
+}
+
+async function mcpTokenEndpoint(db: SupabaseClient, req: Request): Promise<Response> {
+  const params = await parseOAuthBody(req);
+  const basic = basicAuth(req);
+  const id = basic.id || params.client_id || "";
+  const clientSecret = [basic.secret, params.client_secret].find((v) => !!v) || "";
+  const grant = params.grant_type || "client_credentials";
+
+  if (grant === "client_credentials") {
+    if (!(await verifyOAuthClient(db, id, clientSecret))) {
+      return error("invalid_client", 401);
+    }
+    return json(await issueTokenPair(id));
+  }
+
+  if (grant === "authorization_code") {
+    const code = params.code || "";
+    const verifier = params.code_verifier || "";
+    if (!code || !id) return error("invalid_request", 400);
+    const { data } = await db.from("oauth_codes").select("*")
+      .eq("code", code).maybeSingle();
+    if (!data) return error("invalid_grant", 400);
+    const row = data as {
+      client_id: string;
+      redirect_uri: string;
+      code_challenge: string;
+      expires_at: string;
+      used: boolean;
+    };
+    if (
+      row.used || new Date(row.expires_at).getTime() < Date.now() ||
+      row.client_id !== id
+    ) {
+      return error("invalid_grant", 400);
+    }
+    if (params.redirect_uri && params.redirect_uri !== row.redirect_uri) {
+      return error("invalid_grant", 400);
+    }
+    if (clientSecret && !(await verifyOAuthClient(db, id, clientSecret))) {
+      return error("invalid_client", 401);
+    }
+    if (row.code_challenge) {
+      if (!verifier) return error("invalid_request", 400);
+      const digest = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(verifier),
+      );
+      if (!timingSafeEqual(bytesToB64url(new Uint8Array(digest)), row.code_challenge)) {
+        return error("invalid_grant", 400);
+      }
+    }
+    await db.from("oauth_codes").update({ used: true }).eq("code", code);
+    const refresh = randomToken(32);
+    await db.from("oauth_refresh").insert({
+      token: refresh,
+      client_id: id,
+      expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+    });
+    return json({ ...(await issueTokenPair(id)), refresh_token: refresh });
+  }
+
+  if (grant === "refresh_token") {
+    const token = params.refresh_token || "";
+    if (!token || !id) return error("invalid_request", 400);
+    const { data } = await db.from("oauth_refresh").select("*")
+      .eq("token", token).maybeSingle();
+    if (!data) return error("invalid_grant", 400);
+    const row = data as { client_id: string; expires_at: string };
+    if (row.client_id !== id || new Date(row.expires_at).getTime() < Date.now()) {
+      return error("invalid_grant", 400);
+    }
+    await db.from("oauth_refresh").delete().eq("token", token);
+    const refresh = randomToken(32);
+    await db.from("oauth_refresh").insert({
+      token: refresh,
+      client_id: id,
+      expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+    });
+    return json({ ...(await issueTokenPair(id)), refresh_token: refresh });
+  }
+
+  return error("unsupported_grant_type", 400);
+}
+
+// OAuth discovery documents (RFC 9728 + RFC 8414) so Claude / ChatGPT
+// connectors can find the sign-in flow from the MCP URL alone.
+function oauthProtectedResource(): Response {
+  return json({
+    resource: `${OAUTH_ISSUER}/mcp`,
+    authorization_servers: [OAUTH_ISSUER],
+    bearer_methods_supported: ["header"],
+    scopes_supported: ["admin"],
+  });
+}
+
+function oauthServerMetadata(): Response {
+  return json({
+    issuer: OAUTH_ISSUER,
+    authorization_endpoint: `${OAUTH_ISSUER}/oauth/authorize`,
+    token_endpoint: `${OAUTH_ISSUER}/oauth/token`,
+    registration_endpoint: `${OAUTH_ISSUER}/oauth/register`,
+    response_types_supported: ["code"],
+    grant_types_supported: ["authorization_code", "refresh_token", "client_credentials"],
+    code_challenge_methods_supported: ["S256"],
+    token_endpoint_auth_methods_supported: ["client_secret_post", "client_secret_basic", "none"],
+    scopes_supported: ["admin"],
+  });
+}
+
+// Dynamic Client Registration (RFC 7591): Claude registers itself, no
+// manual client setup needed.
+async function oauthRegister(db: SupabaseClient, req: Request): Promise<Response> {
+  const body = await readJsonBody(req);
+  if (!body) return error("Request body must be a JSON object", 400);
+  const clientId = `pkd-${randomToken(9)}`;
+  const wantPublic = body.token_endpoint_auth_method === "none";
+  const newClientSecret = wantPublic ? "" : randomToken(24);
+  const redirectUris = Array.isArray(body.redirect_uris)
+    ? (body.redirect_uris as unknown[]).filter((u) => typeof u === "string").join("\n")
+    : "";
+  const { error: dbError } = await db.from("oauth_clients").insert({
+    client_id: clientId,
+    client_secret_hash: newClientSecret ? await sha256Hex(newClientSecret) : "",
+    redirect_uris: redirectUris,
+  });
+  if (dbError) return error(dbError.message, 500);
+  return json({
+    client_id: clientId,
+    ...(newClientSecret ? Object.fromEntries([["client_secret", newClientSecret]]) : {}),
+    redirect_uris: redirectUris ? redirectUris.split("\n") : [],
+    grant_types: ["authorization_code", "refresh_token"],
+    response_types: ["code"],
+    token_endpoint_auth_method: newClientSecret ? "client_secret_post" : "none",
+  }, 201);
+}
+
+function authorizePage(params: URLSearchParams, message = ""): Response {
+  const hidden = ["response_type", "client_id", "redirect_uri", "code_challenge", "code_challenge_method", "state", "scope", "resource"]
+    .map((k) => `<input type="hidden" name="${k}" value="${(params.get(k) ?? "").replace(/"/g, "&quot;")}">`)
+    .join("");
+  const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect — Prime Khatab Deals</title>
+<style>body{font-family:system-ui,sans-serif;background:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;max-width:380px;width:92%}
+h1{font-size:19px;margin:0 0 6px}p{color:#475569;font-size:14px;line-height:1.5}
+input[type=password]{width:100%;box-sizing:border-box;padding:11px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px;margin:12px 0}
+button{width:100%;background:#2563eb;color:#fff;border:0;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer}
+.err{color:#dc2626;font-size:13px;margin-top:10px}</style></head>
+<body><div class="card">
+<h1>Connect to Prime Khatab Deals</h1>
+<p>An AI app is asking to manage deals on <b>primekhatab.in</b> (add, update and delete deals). Enter the admin key to approve. Only approve apps you started yourself.</p>
+<form method="POST" action="${OAUTH_ISSUER}/oauth/authorize">
+${hidden}
+<input type="password" name="admin_key" placeholder="Admin key" autocomplete="off" required>
+<button type="submit">Approve connection</button>
+${message ? `<div class="err">${message}</div>` : ""}
+</form></div></body></html>`;
+  return new Response(html, {
+    status: 200,
+    headers: { "content-type": "text/html; charset=utf-8", ...CORS_HEADERS },
+  });
+}
+
+async function oauthAuthorize(db: SupabaseClient, req: Request): Promise<Response> {
+  if (req.method === "GET") {
+    const url = new URL(req.url);
+    return authorizePage(url.searchParams);
+  }
+  const form = Object.fromEntries(new URLSearchParams(await req.text()));
+  const params = new URLSearchParams(form as Record<string, string>);
+  const adminKey = Deno.env.get("ADMIN_API_KEY") ?? "";
+  if (!adminKey || !timingSafeEqual(form.admin_key ?? "", adminKey)) {
+    return authorizePage(params, "Wrong admin key — try again.");
+  }
+  const clientId = form.client_id ?? "";
+  const redirectUri = form.redirect_uri ?? "";
+  if (!clientId || !redirectUri) {
+    return error("client_id and redirect_uri are required", 400);
+  }
+  if (clientId !== (Deno.env.get("MCP_CLIENT_ID") ?? "")) {
+    const { data } = await db.from("oauth_clients")
+      .select("redirect_uris").eq("client_id", clientId).maybeSingle();
+    if (!data) return error("Unknown client_id", 400);
+    const allowed = ((data as { redirect_uris: string }).redirect_uris || "").split("\n");
+    if (!allowed.includes(redirectUri)) {
+      return error("redirect_uri is not registered for this client", 400);
+    }
+  }
+  const code = randomToken(24);
+  const { error: dbError } = await db.from("oauth_codes").insert({
+    code,
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    code_challenge: form.code_challenge ?? "",
+    expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+  });
+  if (dbError) return error(dbError.message, 500);
+  const back = new URL(redirectUri);
+  back.searchParams.set("code", code);
+  if (form.state) back.searchParams.set("state", form.state);
+  return Response.redirect(back.toString(), 302);
 }
 
 const MCP_TOOLS = [
@@ -1034,11 +1269,43 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }
     }
     if (resource === "mcp" && segments.length === 2 && segments[1] === "token") {
-      if (req.method === "POST") return mcpTokenEndpoint(req);
+      if (req.method === "POST") return mcpTokenEndpoint(db, req);
+    }
+    if (
+      resource === ".well-known" && segments.length === 2 &&
+      segments[1] === "oauth-protected-resource"
+    ) {
+      if (req.method === "GET") return oauthProtectedResource();
+    }
+    if (
+      resource === ".well-known" && segments.length === 2 &&
+      segments[1] === "oauth-authorization-server"
+    ) {
+      if (req.method === "GET") return oauthServerMetadata();
+    }
+    if (resource === "oauth" && segments.length === 2 && segments[1] === "token") {
+      if (req.method === "POST") return mcpTokenEndpoint(db, req);
+    }
+    if (resource === "oauth" && segments.length === 2 && segments[1] === "register") {
+      if (req.method === "POST") return oauthRegister(db, req);
+    }
+    if (resource === "oauth" && segments.length === 2 && segments[1] === "authorize") {
+      if (req.method === "GET" || req.method === "POST") {
+        return oauthAuthorize(db, req);
+      }
     }
     if (resource === "mcp" && segments.length === 1) {
       if (req.method === "POST") {
-        if (!(await isAdmin(req))) return unauthorized();
+        if (!(await isAdmin(req))) {
+          return json(
+            { error: "Unauthorized — OAuth sign-in or admin Bearer token required." },
+            401,
+            {
+              "WWW-Authenticate":
+                `Bearer resource_metadata="${OAUTH_ISSUER}/.well-known/oauth-protected-resource", scope="admin"`,
+            },
+          );
+        }
         return mcpEndpoint(db, req);
       }
       if (req.method === "GET") {
