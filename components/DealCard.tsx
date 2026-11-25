@@ -29,8 +29,39 @@ export function EyeIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {
 
 export function BestChip() {
   return (
-    <span className="rounded bg-amber-400 px-2 py-0.5 text-xs font-extrabold tracking-wide text-slate-900">
+    <span
+      className="rounded px-2 py-0.5 text-xs font-extrabold tracking-wide"
+      style={{
+        background:
+          "linear-gradient(135deg, #f7e08b 0%, #e9c860 28%, #b8860b 55%, #f3d27a 78%, #caa437 100%)",
+        color: "#3a2a00",
+        border: "1px solid #a87f14",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.65)",
+        textShadow: "0 1px 0 rgba(255,246,200,0.6)",
+      }}
+    >
       ★ BEST
+    </span>
+  );
+}
+
+export function LimitedTimeChip() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-bold tracking-wide text-red-600">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-3 w-3"
+        aria-hidden
+      >
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </svg>
+      LIMITED TIME
     </span>
   );
 }
@@ -62,6 +93,7 @@ export default function DealCard({
               {deal.badge}
             </span>
           )}
+          <LimitedTimeChip />
         </div>
       </div>
 

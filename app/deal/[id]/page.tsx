@@ -13,7 +13,7 @@ import {
 import CopyCode from "@/components/CopyCode";
 import BrandTile from "@/components/BrandTile";
 import ViewPing from "@/components/ViewPing";
-import { BestChip, EyeIcon } from "@/components/DealCard";
+import { BestChip, EyeIcon, LimitedTimeChip } from "@/components/DealCard";
 import ShareButton from "@/components/ShareButton";
 import DealCard from "@/components/DealCard";
 import PosterBanner from "@/components/PosterBanner";
@@ -202,6 +202,7 @@ export default async function DealPage({ params }: { params: { id: string } }) {
                 {deal.badge}
               </span>
             )}
+            <LimitedTimeChip />
             {deal.verified && (
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
                 Verified{listed ? ` · ${listed}` : ""}
