@@ -664,6 +664,328 @@ async function notifyPush(db: SupabaseClient, req: Request): Promise<Response> {
   return json({ ok: true, ...result });
 }
 
+// --------------------------------------------------------------- MCP ----
+// Remote MCP server (streamable HTTP, JSON-RPC 2.0) so any AI tool can
+// manage deals with the URL + credentials:
+//   Token:  POST /mcp/token  {grant_type:"client_credentials", client_id,
+//           client_secret}  ->  {access_token}  (HS256 JWT, MCP_TOKEN_SECRET)
+//   MCP:    POST /mcp  with Authorization: Bearer <token>  (the ADMIN_API_KEY
+//           also works directly as the Bearer token)
+
+async function issueMcpToken(clientId: string): Promise<string> {
+  const secret = Deno.env.get("MCP_TOKEN_SECRET") ?? "";
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const now = Math.floor(Date.now() / 1000);
+  const header = bytesToB64url(
+    new TextEncoder().encode(JSON.stringify({ typ: "JWT", alg: "HS256" })),
+  );
+  const payload = bytesToB64url(
+    new TextEncoder().encode(
+      JSON.stringify({ sub: clientId, scope: "admin", iat: now, exp: now + 3600 }),
+    ),
+  );
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(`${header}.${payload}`),
+  );
+  return `${header}.${payload}.${bytesToB64url(new Uint8Array(sig))}`;
+}
+
+async function mcpTokenEndpoint(req: Request): Promise<Response> {
+  let id = "";
+  let secret = "";
+  const basic = (req.headers.get("authorization") ?? "").replace(/^Basic /, "");
+  if (basic) {
+    try {
+      const decoded = atob(basic);
+      const idx = decoded.indexOf(":");
+      if (idx > -1) {
+        id = decoded.slice(0, idx);
+        secret = decoded.slice(idx + 1);
+      }
+    } catch {
+      // fall through to body params
+    }
+  }
+  if (!id) {
+    // Accept JSON or application/x-www-form-urlencoded bodies.
+    let params: Record<string, string> = {};
+    try {
+      const raw = await req.text();
+      if (raw.trim().startsWith("{")) {
+        const parsed = JSON.parse(raw) as Record<string, unknown>;
+        for (const [k, v] of Object.entries(parsed)) {
+          if (typeof v === "string") params[k] = v;
+        }
+      } else {
+        params = Object.fromEntries(new URLSearchParams(raw));
+      }
+    } catch {
+      params = {};
+    }
+    id = params.client_id ?? "";
+    secret = params.client_secret ?? "";
+    if (params.grant_type !== undefined && params.grant_type !== "client_credentials") {
+      return error("unsupported_grant_type", 400);
+    }
+  }
+  const wantId = Deno.env.get("MCP_CLIENT_ID") ?? "";
+  const wantSecret = Deno.env.get("MCP_CLIENT_SECRET") ?? "";
+  if (
+    !wantId || !wantSecret || !timingSafeEqual(id, wantId) ||
+    !timingSafeEqual(secret, wantSecret)
+  ) {
+    return error("invalid_client", 401);
+  }
+  const access_token = await issueMcpToken(id);
+  return json({ access_token, token_type: "Bearer", expires_in: 3600 });
+}
+
+const MCP_TOOLS = [
+  {
+    name: "add_deal",
+    description:
+      "Add a new deal/offer to Prime Khatab Deals (primekhatab.in). It goes live immediately and a push notification is sent to subscribers.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        brand: { type: "string", description: "Brand / website name, e.g. Hostinger" },
+        title: { type: "string", description: "Offer title" },
+        description: { type: "string", description: "What the user gets, eligibility, country limits" },
+        code: { type: "string", description: "Promo code, or empty if no code is needed" },
+        url: { type: "string", description: "Official deal URL" },
+        category: { type: "string", description: "Site category — use list_categories" },
+        badge: { type: "string", description: "Badge text, e.g. FREE, 50% OFF, 1 MONTH FREE" },
+        expiry: { type: "string", description: "Expiry date YYYY-MM-DD (omit for ongoing offers)" },
+        logo_url: { type: "string", description: "Brand logo image URL (omit to auto-use the brand site icon)" },
+        image_url: { type: "string", description: "Poster/banner image URL for the deal page" },
+        featured: { type: "boolean", description: "Pin as BEST at the top" },
+        sort_order: { type: "number", description: "Higher = higher among featured deals" },
+      },
+      required: ["brand", "title", "url", "category"],
+    },
+  },
+  {
+    name: "list_deals",
+    description: "List deals currently on the site (optionally filter by category).",
+    inputSchema: {
+      type: "object",
+      properties: { category: { type: "string" } },
+    },
+  },
+  {
+    name: "update_deal",
+    description: "Update fields of an existing deal by id (use list_deals to find ids).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        brand: { type: "string" },
+        title: { type: "string" },
+        description: { type: "string" },
+        code: { type: "string" },
+        url: { type: "string" },
+        category: { type: "string" },
+        badge: { type: "string" },
+        expiry: { type: "string" },
+        logo_url: { type: "string" },
+        image_url: { type: "string" },
+        verified: { type: "boolean" },
+        featured: { type: "boolean" },
+        sort_order: { type: "number" },
+      },
+      required: ["id"],
+    },
+  },
+  {
+    name: "delete_deal",
+    description: "Delete a deal by id.",
+    inputSchema: {
+      type: "object",
+      properties: { id: { type: "string" } },
+      required: ["id"],
+    },
+  },
+  {
+    name: "list_categories",
+    description: "List all deal categories on the site.",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
+    name: "add_category",
+    description: "Add a new custom deal category.",
+    inputSchema: {
+      type: "object",
+      properties: { name: { type: "string" } },
+      required: ["name"],
+    },
+  },
+];
+
+function mcpText(obj: unknown) {
+  return {
+    content: [
+      {
+        type: "text",
+        text: typeof obj === "string" ? obj : JSON.stringify(obj, null, 2),
+      },
+    ],
+  };
+}
+
+async function mcpCallTool(
+  db: SupabaseClient,
+  name: string,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  switch (name) {
+    case "add_deal": {
+      const invalid = validateDeal(args, false);
+      if (invalid) return { error: invalid };
+      const input = args as unknown as DealInput;
+      let logo = input.logo_url ?? "";
+      if (!logo) {
+        try {
+          const host = new URL(input.url).hostname.replace(/^www\./, "");
+          logo = `https://www.google.com/s2/favicons?domain=${host}&sz=128`;
+        } catch {
+          logo = "";
+        }
+      }
+      const deal = {
+        id: `${slugify(`${input.brand}-${input.title}`)}-${Date.now().toString(36)}`,
+        brand: input.brand.trim(),
+        title: input.title.trim(),
+        description: input.description ?? "",
+        code: input.code ?? "",
+        url: input.url,
+        category: input.category.trim(),
+        badge: input.badge ?? "FREE",
+        logo_url: logo,
+        image_url: input.image_url ?? "",
+        expiry: input.expiry ?? "2099-12-31",
+        verified: true,
+        published: true,
+        featured: input.featured ?? false,
+        sort_order: typeof input.sort_order === "number" ? input.sort_order : 0,
+      };
+      const { data, error: dbError } = await db.from("deals").insert(deal)
+        .select(DEAL_COLUMNS).single();
+      if (dbError) return { error: dbError.message };
+      if (data) notifyNewDeal(db, data as Record<string, unknown>);
+      return data;
+    }
+    case "list_deals": {
+      let query = db.from("deals").select(DEAL_COLUMNS)
+        .order("featured", { ascending: false })
+        .order("sort_order", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (typeof args.category === "string" && args.category) {
+        query = query.eq("category", args.category);
+      }
+      const { data, error: dbError } = await query;
+      if (dbError) return { error: dbError.message };
+      return data ?? [];
+    }
+    case "update_deal": {
+      const id = args.id;
+      if (typeof id !== "string" || !id) return { error: "id is required" };
+      const { id: _drop, ...rest } = args;
+      const invalid = validateDeal(rest, true);
+      if (invalid) return { error: invalid };
+      const patch = pickDealFields(rest);
+      if (Object.keys(patch).length === 0) return { error: "No fields to update" };
+      const { data, error: dbError } = await db.from("deals").update(patch)
+        .eq("id", id).select(DEAL_COLUMNS).maybeSingle();
+      if (dbError) return { error: dbError.message };
+      return data ?? { error: `Deal not found: ${id}` };
+    }
+    case "delete_deal": {
+      const id = args.id;
+      if (typeof id !== "string" || !id) return { error: "id is required" };
+      const { data, error: dbError } = await db.from("deals").delete()
+        .eq("id", id).select("id");
+      if (dbError) return { error: dbError.message };
+      return { deleted: (data ?? []).length > 0, id };
+    }
+    case "list_categories": {
+      const { data } = await db.from("categories").select("name").order("name");
+      const custom = (data ?? []).map((r: { name: string }) => r.name)
+        .filter((n) => !BASE_CATEGORIES.includes(n));
+      return [...BASE_CATEGORIES, ...custom];
+    }
+    case "add_category": {
+      const name = typeof args.name === "string" ? args.name.trim() : "";
+      if (!name) return { error: "name is required" };
+      if (!BASE_CATEGORIES.includes(name)) {
+        const { error: dbError } = await db.from("categories").insert({ name });
+        if (dbError && !/duplicate|unique/i.test(dbError.message)) {
+          return { error: dbError.message };
+        }
+      }
+      return { added: name };
+    }
+    default:
+      return { error: `Unknown tool: ${name}` };
+  }
+}
+
+async function mcpEndpoint(db: SupabaseClient, req: Request): Promise<Response> {
+  const body = await readJsonBody(req);
+  if (!body) return error("Request body must be a JSON object", 400);
+  const id = (body.id ?? null) as string | number | null;
+  const method = typeof body.method === "string" ? body.method : "";
+  const rpc = (result: unknown) => json({ jsonrpc: "2.0", id, result });
+  const rpcError = (code: number, message: string) =>
+    json({ jsonrpc: "2.0", id, error: { code, message } });
+
+  if (method.startsWith("notifications/")) {
+    return new Response(null, { status: 202, headers: CORS_HEADERS });
+  }
+  switch (method) {
+    case "initialize": {
+      const params = (body.params ?? {}) as { protocolVersion?: string };
+      return rpc({
+        protocolVersion: params.protocolVersion ?? "2024-11-05",
+        capabilities: { tools: {} },
+        serverInfo: { name: "primekhatab-deals-admin", version: "1.0.0" },
+      });
+    }
+    case "ping":
+      return rpc({});
+    case "tools/list":
+      return rpc({ tools: MCP_TOOLS });
+    case "tools/call": {
+      const params = (body.params ?? {}) as {
+        name?: string;
+        arguments?: Record<string, unknown>;
+      };
+      if (!params.name) return rpcError(-32602, "tools/call requires a tool name");
+      try {
+        const result = await mcpCallTool(db, params.name, params.arguments ?? {});
+        const isErr =
+          result !== null && typeof result === "object" && "error" in result;
+        return rpc({ ...mcpText(result), ...(isErr ? { isError: true } : {}) });
+      } catch (e) {
+        return rpc({
+          ...mcpText({ error: e instanceof Error ? e.message : "Tool failed" }),
+          isError: true,
+        });
+      }
+    }
+    default:
+      return rpcError(-32601, `Method not found: ${method}`);
+  }
+}
+
 // -------------------------------------------------------------- server ----
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -709,6 +1031,23 @@ Deno.serve(async (req: Request): Promise<Response> => {
       if (req.method === "DELETE") {
         if (!(await isAdmin(req))) return unauthorized();
         return deleteDeal(db, id);
+      }
+    }
+    if (resource === "mcp" && segments.length === 2 && segments[1] === "token") {
+      if (req.method === "POST") return mcpTokenEndpoint(req);
+    }
+    if (resource === "mcp" && segments.length === 1) {
+      if (req.method === "POST") {
+        if (!(await isAdmin(req))) return unauthorized();
+        return mcpEndpoint(db, req);
+      }
+      if (req.method === "GET") {
+        return json({
+          service: "primekhatab-deals-mcp",
+          transport: "streamable-http (JSON-RPC 2.0 over POST)",
+          token_url: "POST /mcp/token (OAuth2 client_credentials)",
+          tools: MCP_TOOLS.map((t) => t.name),
+        });
       }
     }
     if (resource === "push" && segments.length === 2 && segments[1] === "subscribe") {
