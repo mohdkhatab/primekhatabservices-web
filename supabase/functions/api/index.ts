@@ -163,6 +163,7 @@ type DealInput = {
   verified?: boolean;
   published?: boolean;
   featured?: boolean;
+  sort_order?: number;
 };
 
 function validateDeal(
@@ -234,6 +235,7 @@ function pickDealFields(
       "verified",
       "published",
       "featured",
+      "sort_order",
     ]
   ) {
     if (body[f] !== undefined) out[f] = body[f];
@@ -258,7 +260,7 @@ async function readJsonBody(
 
 const today = () => new Date().toISOString().slice(0, 10);
 const DEAL_COLUMNS =
-  "id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, published, created_at, views, featured";
+  "id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, published, created_at, views, featured, sort_order";
 
 async function listDeals(
   db: SupabaseClient,
@@ -280,7 +282,9 @@ async function listDeals(
     .eq("published", true)
     .gte("expiry", today())
     .order("featured", { ascending: false })
+    .order("sort_order", { ascending: false })
     .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
     .limit(limit);
   if (category) query = query.eq("category", category);
   if (q) {
@@ -329,6 +333,7 @@ async function createDeal(db: SupabaseClient, req: Request): Promise<Response> {
     verified: input.verified ?? true,
     published: input.published ?? true,
     featured: input.featured ?? false,
+    sort_order: typeof input.sort_order === "number" ? input.sort_order : 0,
   };
   const { data, error: dbError } = await db.from("deals").insert(deal).select(
     DEAL_COLUMNS,

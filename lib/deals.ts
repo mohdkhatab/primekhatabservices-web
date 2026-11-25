@@ -204,9 +204,12 @@ export async function getDeals(): Promise<Deal[]> {
     try {
       const { data, error } = await supabase
         .from("deals")
-        .select("id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, created_at, views, featured")
+        .select("id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, created_at, views, featured, sort_order")
         .eq("published", true)
-        .order("created_at", { ascending: false });
+        .order("featured", { ascending: false })
+        .order("sort_order", { ascending: false })
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false });
       if (!error && data && data.length > 0) {
         return (data as Deal[]).filter((d) => !isExpired(d)).map(normalizeDeal);
       }
