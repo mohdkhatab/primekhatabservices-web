@@ -32,7 +32,8 @@
     "supabase",
     "mcp",
     ".next",
-    "src"
+    "src",
+    "vite.config.ts"
   ],
   "include": [
     "next-env.d.ts",
