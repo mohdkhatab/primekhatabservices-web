@@ -17,12 +17,12 @@ html {
 
 body {
   background: #ffffff;
-  color: #1c1917;
+  color: #0f172a;
 }
 
-/* Animated pink gradient text (pink -> rose -> fuchsia light) */
+/* Animated royal-blue gradient text (blue-600 -> blue-500 -> sky-500) */
 .text-gradient {
-  background: linear-gradient(90deg, #ec4899, #f43f5e, #d946ef, #ec4899);
+  background: linear-gradient(90deg, #2563eb, #3b82f6, #0ea5e9, #2563eb);
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -46,8 +46,8 @@ body {
 }
 
 ::selection {
-  background: #fbcfe8;
-  color: #831843;
+  background: #bfdbfe;
+  color: #1e3a8a;
 }
 
 ::-webkit-scrollbar {
@@ -55,9 +55,18 @@ body {
   width: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #fbcfe8;
+  background: #bfdbfe;
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #f472b6;
+  background: #60a5fa;
+}
+
+/* Hide scrollbars on horizontal deal rails while keeping scroll */
+.rail-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.rail-scroll::-webkit-scrollbar {
+  display: none;
 }

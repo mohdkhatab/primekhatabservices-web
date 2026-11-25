@@ -70,6 +70,8 @@ export async function addDeal(input) {
     url: input.url,
     category: input.category,
     badge: input.badge || "FREE",
+    logo_url: input.logo_url || "",
+    image_url: input.image_url || "",
     expiry: input.expiry || "2099-12-31",
     verified: true,
     created_at: new Date().toISOString().slice(0, 10),

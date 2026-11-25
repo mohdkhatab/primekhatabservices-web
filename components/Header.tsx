@@ -1,53 +1,54 @@
 import Link from "next/link";
-import { getCategoryNames, categorySlug } from "@/lib/deals";
+import { DEAL_TYPES, getCategoryNames, getDeals } from "@/lib/deals";
 import HeaderSearch from "./HeaderSearch";
+import HeaderMenu from "./HeaderMenu";
+import SiteLogo from "./SiteLogo";
 
-export default function Header() {
-  const categories = getCategoryNames();
+/**
+ * Sticky header — LEFT: three-dots button opening the category drawer,
+ * then the logo + wordmark. CENTER: search. RIGHT: Submit a Deal pill.
+ * On mobile the search moves to its own row under the top bar.
+ */
+export default async function Header() {
+  const deals = await getDeals();
+  const categories = getCategoryNames().map((name) => ({
+    name,
+    count: deals.filter((d) => d.category === name).length,
+  }));
+  const types = DEAL_TYPES.map((name) => ({
+    name,
+    count: deals.filter((d) => d.type === name).length,
+  }));
+
   return (
-    <header className="sticky top-0 z-40 border-b border-pink-100 bg-white/80 shadow-[0_8px_30px_-18px_rgba(219,39,119,0.35)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+    <header className="sticky top-0 z-40 border-b border-blue-100 bg-white/90 shadow-[0_10px_36px_-20px_rgba(29,78,216,0.35)] backdrop-blur-xl">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2.5 px-4 py-3">
+        <HeaderMenu categories={categories} types={types} />
+
         <Link href="/" className="group flex shrink-0 items-center gap-2.5">
-          <span className="btn-shine relative overflow-hidden rounded-xl bg-gradient-to-br from-pink-400 via-brand-500 to-rose-500 px-2.5 py-1.5 font-display text-base font-extrabold text-white shadow-glow transition-transform duration-300 group-hover:scale-105">
-            PK
-          </span>
-          <span className="font-display text-lg font-bold tracking-tight text-stone-900">
+          <SiteLogo className="h-10 w-10 transition-transform duration-300 group-hover:scale-105" />
+          <span className="font-display text-lg font-extrabold tracking-tight text-slate-900">
             Prime Khatab <span className="text-gradient">Deals</span>
           </span>
         </Link>
-        <HeaderSearch />
-        <nav className="ml-auto hidden items-center gap-5 text-sm font-medium text-stone-600 lg:flex">
-          <Link href="/#new-arrivals" className="transition hover:text-brand-600">Latest Deals</Link>
-          <Link href="/category/student-offers" className="transition hover:text-brand-600">Student Deals</Link>
-          <Link href="/category/startup-deals" className="transition hover:text-brand-600">Startup Deals</Link>
-          <Link href="/categories" className="transition hover:text-brand-600">Categories</Link>
-          <Link
-            href="/submit-deal"
-            className="btn-shine relative overflow-hidden rounded-full bg-gradient-to-r from-brand-500 to-rose-500 px-4 py-2 font-display font-bold text-white shadow-glow transition-transform duration-300 hover:scale-105"
-          >
-            Submit Deal
-          </Link>
-        </nav>
+
+        <div className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1 sm:px-3">
+          <HeaderSearch />
+        </div>
+
         <Link
           href="/submit-deal"
-          className="btn-shine relative ml-auto overflow-hidden rounded-full bg-gradient-to-r from-brand-500 to-rose-500 px-4 py-2 text-sm font-bold text-white shadow-glow transition-transform duration-300 hover:scale-105 lg:hidden"
+          className="btn-shine relative order-2 ml-auto hidden shrink-0 overflow-hidden rounded-full bg-gradient-to-r from-brand-600 to-blue-700 px-5 py-2.5 font-display text-sm font-bold text-white shadow-glow transition-all duration-300 hover:scale-[1.03] hover:brightness-110 active:scale-95 sm:order-3 sm:ml-0 md:block"
+        >
+          Submit a Deal
+        </Link>
+        <Link
+          href="/submit-deal"
+          className="order-2 ml-auto shrink-0 rounded-full bg-gradient-to-r from-brand-600 to-blue-700 px-4 py-2 font-display text-sm font-bold text-white shadow-glow transition active:scale-95 sm:order-3 sm:ml-0 md:hidden"
         >
           Submit
         </Link>
       </div>
-      <nav aria-label="Topics" className="border-t border-pink-50">
-        <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto whitespace-nowrap px-4 py-2 text-[13px]">
-          {categories.map((c) => (
-            <Link
-              key={c}
-              href={`/category/${categorySlug(c)}`}
-              className="rounded-full px-3 py-1 text-stone-500 transition hover:bg-pink-50 hover:text-brand-600"
-            >
-              {c}
-            </Link>
-          ))}
-        </div>
-      </nav>
     </header>
   );
 }

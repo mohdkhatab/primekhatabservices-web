@@ -10,21 +10,23 @@ export default function HeaderSearch({ initial = "" }: { initial?: string }) {
   return (
     <form
       role="search"
-      className="relative min-w-0 flex-1 sm:max-w-xs md:max-w-sm"
+      className="relative min-w-0 flex-1"
       onSubmit={(e) => {
         e.preventDefault();
         const query = q.trim();
         router.push(query ? `/?q=${encodeURIComponent(query)}#all-deals` : "/#all-deals");
       }}
     >
-      <span aria-hidden className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-pink-400">⌕</span>
+      <span aria-hidden className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base text-blue-400">
+        ⌕
+      </span>
       <input
         type="search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search deals, brands, codes…"
         aria-label="Search deals"
-        className="w-full rounded-full border border-pink-200 bg-pink-50/40 py-2 pl-9 pr-4 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-brand-500 focus:bg-white focus:shadow-glow"
+        className="w-full rounded-full border border-blue-200 bg-blue-50/50 py-2.5 pl-10 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:bg-white focus:ring-4 focus:ring-blue-100"
       />
     </form>
   );

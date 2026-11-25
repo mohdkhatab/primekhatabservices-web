@@ -157,6 +157,8 @@ type DealInput = {
   url: string;
   category: string;
   badge?: string;
+  logo_url?: string;
+  image_url?: string;
   expiry?: string;
   verified?: boolean;
   published?: boolean;
@@ -191,6 +193,14 @@ function validateDeal(
   ) {
     return "expiry must be a date in YYYY-MM-DD format";
   }
+  for (const f of ["logo_url", "image_url"] as const) {
+    if (
+      f in body && body[f] !== undefined && body[f] !== "" &&
+      !isValidUrl(body[f])
+    ) {
+      return `${f} must be a valid http(s) URL`;
+    }
+  }
   for (const f of ["description", "code", "badge"] as const) {
     if (f in body && body[f] !== undefined && typeof body[f] !== "string") {
       return `${f} must be a string`;
@@ -217,6 +227,8 @@ function pickDealFields(
       "url",
       "category",
       "badge",
+      "logo_url",
+      "image_url",
       "expiry",
       "verified",
       "published",
@@ -244,7 +256,7 @@ async function readJsonBody(
 
 const today = () => new Date().toISOString().slice(0, 10);
 const DEAL_COLUMNS =
-  "id, brand, title, description, code, url, category, badge, expiry, verified, published, created_at";
+  "id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, published, created_at";
 
 async function listDeals(
   db: SupabaseClient,

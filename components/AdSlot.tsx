@@ -19,7 +19,7 @@ export default function AdSlot({
     <div
       aria-label="Advertisement"
       data-ad-placement={placement}
-      className={`flex items-center justify-center rounded-2xl border border-dashed border-pink-200 bg-pink-50/50 text-[11px] uppercase tracking-[0.25em] text-stone-400 ${height} ${className}`}
+      className={`flex items-center justify-center rounded-2xl border border-dashed border-blue-200 bg-blue-50/50 text-[11px] uppercase tracking-[0.25em] text-slate-400 ${height} ${className}`}
     >
       Ad — {placement}
     </div>

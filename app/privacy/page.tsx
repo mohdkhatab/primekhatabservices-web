@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <div className="max-w-3xl animate-fade-up">
-      <h1 className="font-display text-3xl font-extrabold text-stone-900">Privacy Policy</h1>
-      <div className="mt-4 space-y-3 leading-relaxed text-stone-600">
+      <h1 className="font-display text-3xl font-extrabold text-slate-900">Privacy Policy</h1>
+      <div className="mt-4 space-y-3 leading-relaxed text-slate-600">
         <p>
           Prime Khatab Deals is a listing website run by Prime Khatab Services. You can browse every
           deal here without creating an account — we do not ask for your name, password or payment details, ever.

@@ -28,6 +28,8 @@ function buildServer() {
       category: z.string().describe("One of the site categories — use list_categories to see them"),
       expiry: z.string().optional().describe("Expiry date YYYY-MM-DD"),
       badge: z.string().optional().describe("Badge text, e.g. FREE, 50% OFF, APPLY"),
+      logo_url: z.string().url().optional().describe("Brand logo image link (any CDN/image URL), shown on cards and the spotlight grid"),
+      image_url: z.string().url().optional().describe("Poster/banner image link for the deal page hero"),
     },
     async (args) => text(await db.addDeal(args))
   );
@@ -55,6 +57,8 @@ function buildServer() {
       category: z.string().optional(),
       expiry: z.string().optional(),
       badge: z.string().optional(),
+      logo_url: z.string().url().optional(),
+      image_url: z.string().url().optional(),
       verified: z.boolean().optional(),
     },
     async ({ id, ...patch }) => {

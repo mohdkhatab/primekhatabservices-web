@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="max-w-3xl animate-fade-up">
-      <h1 className="font-display text-3xl font-extrabold text-stone-900">Terms of Use</h1>
-      <div className="mt-4 space-y-3 leading-relaxed text-stone-600">
+      <h1 className="font-display text-3xl font-extrabold text-slate-900">Terms of Use</h1>
+      <div className="mt-4 space-y-3 leading-relaxed text-slate-600">
         <p>
           Prime Khatab Deals lists free offers, promo codes and discounts for information only. Every deal
           is checked when it is posted, but offers change: a code can expire, a price can move, and stock can end.

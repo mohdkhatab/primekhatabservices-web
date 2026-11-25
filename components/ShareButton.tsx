@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-/** Share button — copies the current page link to the clipboard. */
+/** Share button — native share sheet where available, else copies the page link. */
 export default function ShareButton({ title }: { title?: string }) {
   const [copied, setCopied] = useState(false);
   async function share() {
@@ -34,8 +34,8 @@ export default function ShareButton({ title }: { title?: string }) {
       onClick={share}
       className={`rounded-full px-5 py-2.5 font-display text-sm font-bold transition-all duration-300 hover:scale-105 active:scale-95 ${
         copied
-          ? "animate-pop bg-rose-500 text-white shadow-glow"
-          : "border border-pink-300 bg-white text-brand-600 hover:bg-pink-50"
+          ? "animate-pop bg-blue-700 text-white shadow-glow"
+          : "border border-blue-300 bg-white text-brand-600 hover:bg-blue-50"
       }`}
     >
       {copied ? "Link Copied ✓" : "↗ Share"}

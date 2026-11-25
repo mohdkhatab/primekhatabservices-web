@@ -4,18 +4,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand = pink family only (pink/rose shades)
-        brand: { 50:"#fdf2f8",100:"#fce7f3",200:"#fbcfe8",300:"#f9a8d4",400:"#f472b6",500:"#ec4899",600:"#db2777",700:"#be185d" },
-        ink: "#1c1917",
+        // Brand = royal blue family ONLY (white + royal blue scheme)
+        brand: {
+          50: "#eff6ff",
+          100: "#dbeafe",
+          200: "#bfdbfe",
+          300: "#93c5fd",
+          400: "#60a5fa",
+          500: "#3b82f6",
+          600: "#2563eb",
+          700: "#1d4ed8",
+          800: "#1e40af",
+          900: "#1e3a8a",
+        },
+        ink: "#0f172a",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "var(--font-inter)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        glow: "0 0 40px -8px rgba(236,72,153,0.45)",
-        card: "0 8px 30px -12px rgba(219,39,119,0.18)",
-        lift: "0 20px 45px -15px rgba(236,72,153,0.40)",
+        glow: "0 0 40px -8px rgba(37,99,235,0.45)",
+        card: "0 8px 30px -12px rgba(29,78,216,0.16)",
+        lift: "0 20px 45px -15px rgba(29,78,216,0.35)",
       },
       keyframes: {
         "fade-up": {

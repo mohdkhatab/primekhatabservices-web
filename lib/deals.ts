@@ -22,6 +22,8 @@ export type Deal = {
   code: string; // "" = no code needed (free tier / direct deal)
   url: string;
   category: string;
+  logoUrl?: string; // brand logo image link (API/DB: logo_url) — "" = use fallback tile
+  imageUrl?: string; // poster / banner image link (API/DB: image_url) — "" = no poster
   badge?: string; // "FREE" | "% OFF" | custom e.g. "50% OFF"
   expiry: string; // ISO date YYYY-MM-DD
   verified: boolean;
@@ -96,8 +98,11 @@ export function inferType(deal: Deal): DealType {
 
 /** Fill enrichment defaults so every source (API / Supabase / JSON) renders the same. */
 export function normalizeDeal(deal: Deal): Deal {
+  const raw = deal as Deal & { logo_url?: string; image_url?: string };
   return {
     ...deal,
+    logoUrl: deal.logoUrl || raw.logo_url || "",
+    imageUrl: deal.imageUrl || raw.image_url || "",
     type: deal.type && (DEAL_TYPES as readonly string[]).includes(deal.type) ? deal.type : inferType(deal),
     views: typeof deal.views === "number" ? deal.views : 0,
     clicks: typeof deal.clicks === "number" ? deal.clicks : 0,
@@ -117,7 +122,6 @@ export function dealStatus(deal: Deal): DealStatus {
     ? Math.floor((Date.now() - new Date(deal.created_at + "T00:00:00").getTime()) / 86400000)
     : 999;
   if (ageDays <= 21) return "New";
-  if ((deal.clicks ?? 0) >= 300) return "Trending";
   return "Active";
 }
 
@@ -176,7 +180,7 @@ export async function getDeals(): Promise<Deal[]> {
     try {
       const { data, error } = await supabase
         .from("deals")
-        .select("id, brand, title, description, code, url, category, badge, expiry, verified, created_at")
+        .select("id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, created_at")
         .eq("published", true)
         .order("created_at", { ascending: false });
       if (!error && data && data.length > 0) {

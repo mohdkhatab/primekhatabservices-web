@@ -5,6 +5,11 @@ import { DEAL_TYPES, type Deal } from "@/lib/deals";
 import DealCard from "./DealCard";
 import AdSlot from "./AdSlot";
 
+/**
+ * Browse All Deals explorer — search + deal-type chips + category chips
+ * filtering a responsive card grid. All counts are computed live from
+ * the deals passed in.
+ */
 export default function DealsExplorer({
   deals,
   categories,
@@ -34,6 +39,13 @@ export default function DealsExplorer({
     });
   }, [deals, query, active, activeType]);
 
+  const chipCls = (on: boolean) =>
+    `rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 ${
+      on
+        ? "bg-gradient-to-r from-brand-600 to-blue-700 text-white shadow-glow"
+        : "border border-blue-200 bg-white text-slate-600 hover:border-blue-400 hover:text-brand-600"
+    }`;
+
   return (
     <section>
       <div className="mx-auto max-w-2xl">
@@ -42,30 +54,21 @@ export default function DealsExplorer({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search deals, brands, promo codes… e.g. hosting, student, AI"
-          className="w-full rounded-full border border-pink-200 bg-white px-5 py-3.5 text-base text-stone-900 shadow-card outline-none transition placeholder:text-stone-400 focus:border-brand-500 focus:shadow-glow"
+          className="w-full rounded-full border border-blue-200 bg-white px-5 py-3.5 text-base text-slate-900 shadow-card outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-blue-100"
           aria-label="Search deals"
         />
       </div>
 
       <div className="mt-6 flex flex-wrap justify-center gap-2">
         {["All", ...categories].map((c) => (
-          <button
-            key={c}
-            type="button"
-            onClick={() => setActive(c)}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-300 hover:scale-105 active:scale-95 ${
-              active === c
-                ? "bg-gradient-to-r from-brand-500 to-rose-500 text-white shadow-glow"
-                : "border border-pink-200 bg-white text-stone-600 hover:border-pink-400 hover:text-brand-600"
-            }`}
-          >
+          <button key={c} type="button" onClick={() => setActive(c)} className={chipCls(active === c)}>
             {c}
           </button>
         ))}
       </div>
 
       <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-stone-400">Deal type:</span>
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Deal type:</span>
         {["All", ...DEAL_TYPES].map((t) => (
           <button
             key={t}
@@ -73,8 +76,8 @@ export default function DealsExplorer({
             onClick={() => setActiveType(t)}
             className={`rounded-full px-3 py-1 text-[13px] font-semibold transition-all duration-300 hover:scale-105 active:scale-95 ${
               activeType === t
-                ? "bg-pink-600 text-white shadow-glow"
-                : "bg-pink-50 text-brand-700 ring-1 ring-pink-200 hover:bg-pink-100"
+                ? "bg-blue-700 text-white shadow-glow"
+                : "bg-blue-50 text-brand-700 ring-1 ring-blue-200 hover:bg-blue-100"
             }`}
           >
             #{t}
@@ -82,7 +85,7 @@ export default function DealsExplorer({
         ))}
       </div>
 
-      <p className="mt-8 text-sm font-semibold text-stone-500">
+      <p className="mt-8 text-sm font-semibold text-slate-500">
         <span className="text-brand-600">{filtered.length}</span> live deal{filtered.length === 1 ? "" : "s"}
         {active !== "All" ? ` in ${active}` : ""}
         {activeType !== "All" ? ` · #${activeType}` : ""}
@@ -90,14 +93,13 @@ export default function DealsExplorer({
       </p>
 
       {filtered.length === 0 ? (
-        <p className="mt-6 animate-fade-in rounded-2xl border border-pink-100 bg-pink-50/50 p-8 text-center text-stone-500">
+        <p className="mt-6 animate-fade-in rounded-2xl border border-blue-100 bg-blue-50/50 p-8 text-center text-slate-500">
           No live deals found. Try another search, category or deal type — new deals are added regularly.
         </p>
       ) : (
         <div key={`${active}-${activeType}-${query}`} className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((deal, i) => (
             <Fragment key={deal.id}>
-              {/* In-feed ad after the 6th card */}
               {i === 6 && (
                 <div className="flex animate-fade-up" style={{ animationDelay: "360ms" }}>
                   <AdSlot placement="infeed" className="w-full" />
