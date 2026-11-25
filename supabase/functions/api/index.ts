@@ -162,6 +162,7 @@ type DealInput = {
   expiry?: string;
   verified?: boolean;
   published?: boolean;
+  featured?: boolean;
 };
 
 function validateDeal(
@@ -206,7 +207,7 @@ function validateDeal(
       return `${f} must be a string`;
     }
   }
-  for (const f of ["verified", "published"] as const) {
+  for (const f of ["verified", "published", "featured"] as const) {
     if (f in body && body[f] !== undefined && typeof body[f] !== "boolean") {
       return `${f} must be a boolean`;
     }
@@ -232,6 +233,7 @@ function pickDealFields(
       "expiry",
       "verified",
       "published",
+      "featured",
     ]
   ) {
     if (body[f] !== undefined) out[f] = body[f];
@@ -256,7 +258,7 @@ async function readJsonBody(
 
 const today = () => new Date().toISOString().slice(0, 10);
 const DEAL_COLUMNS =
-  "id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, published, created_at";
+  "id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, published, created_at, views, featured";
 
 async function listDeals(
   db: SupabaseClient,
@@ -277,6 +279,7 @@ async function listDeals(
     .select(DEAL_COLUMNS)
     .eq("published", true)
     .gte("expiry", today())
+    .order("featured", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(limit);
   if (category) query = query.eq("category", category);
@@ -320,9 +323,12 @@ async function createDeal(db: SupabaseClient, req: Request): Promise<Response> {
     url: input.url,
     category: input.category.trim(),
     badge: input.badge ?? "FREE",
+    logo_url: input.logo_url ?? "",
+    image_url: input.image_url ?? "",
     expiry: input.expiry ?? "2099-12-31",
     verified: input.verified ?? true,
     published: input.published ?? true,
+    featured: input.featured ?? false,
   };
   const { data, error: dbError } = await db.from("deals").insert(deal).select(
     DEAL_COLUMNS,
@@ -416,6 +422,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
         if (!(await isAdmin(req))) return unauthorized();
         return createDeal(db, req);
       }
+    }
+    if (
+      resource === "deals" && segments.length === 3 && id &&
+      segments[2] === "view" && req.method === "POST"
+    ) {
+      // Public view counter — one call per deal-page view from the site.
+      const { error: rpcError } = await db.rpc("increment_deal_view", {
+        deal_id: id,
+      });
+      if (rpcError) return error(rpcError.message, 500);
+      return json({ ok: true });
     }
     if (resource === "deals" && segments.length === 2 && id) {
       if (req.method === "GET") return getDeal(db, id);

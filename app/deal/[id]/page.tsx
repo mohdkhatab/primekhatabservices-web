@@ -12,6 +12,8 @@ import {
 } from "@/lib/deals";
 import CopyCode from "@/components/CopyCode";
 import BrandTile from "@/components/BrandTile";
+import ViewPing from "@/components/ViewPing";
+import { BestChip, EyeIcon } from "@/components/DealCard";
 import ShareButton from "@/components/ShareButton";
 import DealCard from "@/components/DealCard";
 import PosterBanner from "@/components/PosterBanner";
@@ -160,6 +162,7 @@ export default async function DealPage({ params }: { params: { id: string } }) {
 
   return (
     <>
+      <ViewPing dealId={deal.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(offerJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
@@ -193,6 +196,7 @@ export default async function DealPage({ params }: { params: { id: string } }) {
             · {fixedExpiry ? `Valid until ${formatDate(deal.expiry)}` : "Ongoing offer"}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
+            {deal.featured && <BestChip />}
             {deal.badge && (
               <span className="rounded bg-brand-600 px-2 py-0.5 text-xs font-bold text-white">
                 {deal.badge}
@@ -244,6 +248,13 @@ export default async function DealPage({ params }: { params: { id: string } }) {
                 <span className="font-medium text-slate-700">Verified</span> by our team
               </span>
             )}
+            <span className="inline-flex items-center gap-1">
+              <EyeIcon />
+              <span className="font-medium text-slate-700">
+                {(deal.views ?? 0).toLocaleString("en-IN")}
+              </span>{" "}
+              views
+            </span>
           </div>
         </div>
         <div className="flex shrink-0 gap-2">

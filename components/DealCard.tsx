@@ -1,7 +1,39 @@
 import Link from "next/link";
-import { categorySlug, daysLeft, hasFixedExpiry, type Deal } from "@/lib/deals";
+import {
+  categorySlug,
+  daysLeft,
+  formatCount,
+  hasFixedExpiry,
+  type Deal,
+} from "@/lib/deals";
 import CopyCode from "./CopyCode";
 import BrandTile from "./BrandTile";
+
+export function EyeIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+export function BestChip() {
+  return (
+    <span className="rounded bg-amber-400 px-2 py-0.5 text-xs font-extrabold tracking-wide text-slate-900">
+      ★ BEST
+    </span>
+  );
+}
 
 /**
  * DealCard — plain directory card (UI_SPEC): white, 1px border #e2e8f0,
@@ -23,11 +55,14 @@ export default function DealCard({
     >
       <div className="flex items-start justify-between gap-2">
         <BrandTile brand={deal.brand} logoUrl={deal.logoUrl} size="lg" />
-        {deal.badge && (
-          <span className="rounded bg-brand-600 px-2 py-0.5 text-xs font-bold text-white">
-            {deal.badge}
-          </span>
-        )}
+        <div className="flex flex-col items-end gap-1.5">
+          {deal.featured && <BestChip />}
+          {deal.badge && (
+            <span className="rounded bg-brand-600 px-2 py-0.5 text-xs font-bold text-white">
+              {deal.badge}
+            </span>
+          )}
+        </div>
       </div>
 
       <p className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
@@ -60,14 +95,20 @@ export default function DealCard({
         )}
       </div>
 
-      <p className="mt-3 text-xs text-slate-400">
-        {hasFixedExpiry(deal)
-          ? left > 0
-            ? left <= 45
-              ? `Only ${left} day${left === 1 ? "" : "s"} left`
-              : `Valid until ${deal.expiry}`
-            : "Expired"
-          : "Ongoing offer · no fixed end date"}
+      <p className="mt-3 flex items-center gap-3 text-xs text-slate-400">
+        <span>
+          {hasFixedExpiry(deal)
+            ? left > 0
+              ? left <= 45
+                ? `Only ${left} day${left === 1 ? "" : "s"} left`
+                : `Valid until ${deal.expiry}`
+              : "Expired"
+            : "Ongoing offer · no fixed end date"}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <EyeIcon />
+          {formatCount(deal.views ?? 0)} views
+        </span>
       </p>
       <div className="mt-2 flex items-center gap-2 border-t border-slate-100 pt-3">
         <Link
