@@ -1049,6 +1049,49 @@ const MCP_TOOLS = [
     },
   },
   {
+    name: "set_deal_rank",
+    description:
+      "Put ONE deal at an exact position in the website's Top list (position 1 = very top of the homepage). Other ranked deals shift down/up automatically. Use list_deals to find the deal id.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: { type: "string", description: "Deal id" },
+        position: { type: "number", description: "1 = top, 2 = second, 3 = third, and so on" },
+      },
+      required: ["id", "position"],
+    },
+  },
+  {
+    name: "set_top_deals",
+    description:
+      "Set the whole Top list in one call: pass deal ids in order — first id becomes Top 1, second Top 2, and so on. Any deal ranked before but not in this list is removed from the Top list.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        deal_ids: {
+          type: "array",
+          items: { type: "string" },
+          description: "Deal ids in rank order (Top 1 first)",
+        },
+      },
+      required: ["deal_ids"],
+    },
+  },
+  {
+    name: "list_top_deals",
+    description: "Show the current Top list in order (Top 1 first) with positions.",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
+    name: "remove_from_top",
+    description: "Remove a deal from the Top list (it stays on the site, just no longer pinned at the top).",
+    inputSchema: {
+      type: "object",
+      properties: { id: { type: "string" } },
+      required: ["id"],
+    },
+  },
+  {
     name: "list_categories",
     description: "List all deal categories on the site.",
     inputSchema: { type: "object", properties: {} },
@@ -1073,6 +1116,32 @@ function mcpText(obj: unknown) {
       },
     ],
   };
+}
+
+async function rankedDealIds(db: SupabaseClient): Promise<string[]> {
+  const { data } = await db.from("deals").select("id")
+    .gt("sort_order", 0)
+    .order("sort_order", { ascending: false })
+    .order("id", { ascending: false });
+  return (data ?? []).map((r: { id: string }) => r.id);
+}
+
+async function applyRanking(
+  db: SupabaseClient,
+  orderedIds: string[],
+): Promise<void> {
+  // Rank 1 gets the highest sort_order; ranks are rewritten gap-free.
+  for (let i = 0; i < orderedIds.length; i++) {
+    await db.from("deals")
+      .update({ sort_order: 1000 - i, featured: true })
+      .eq("id", orderedIds[i]);
+  }
+}
+
+async function dealExists(db: SupabaseClient, id: string): Promise<boolean> {
+  const { data } = await db.from("deals").select("id").eq("id", id)
+    .maybeSingle();
+  return !!data;
 }
 
 async function mcpCallTool(
@@ -1150,6 +1219,73 @@ async function mcpCallTool(
         .eq("id", id).select("id");
       if (dbError) return { error: dbError.message };
       return { deleted: (data ?? []).length > 0, id };
+    }
+    case "set_deal_rank": {
+      const id = args.id;
+      const position = args.position;
+      if (typeof id !== "string" || !id) return { error: "id is required" };
+      if (typeof position !== "number" || position < 1) {
+        return { error: "position must be 1 or higher (1 = top)" };
+      }
+      if (!(await dealExists(db, id))) return { error: `Deal not found: ${id}` };
+      const current = (await rankedDealIds(db)).filter((x) => x !== id);
+      const at = Math.min(Math.floor(position) - 1, current.length);
+      current.splice(at, 0, id);
+      await applyRanking(db, current);
+      return {
+        id,
+        position: at + 1,
+        top: current.map((dealId, i) => ({ position: i + 1, id: dealId })),
+      };
+    }
+    case "set_top_deals": {
+      const ids = args.deal_ids;
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return { error: "deal_ids must be a non-empty array of deal ids" };
+      }
+      const unique = [...new Set(ids.filter((x) => typeof x === "string"))];
+      for (const id of unique) {
+        if (!(await dealExists(db, id))) {
+          return { error: `Deal not found: ${id}` };
+        }
+      }
+      const previous = await rankedDealIds(db);
+      for (const old of previous) {
+        if (!unique.includes(old)) {
+          await db.from("deals").update({ sort_order: 0 }).eq("id", old);
+        }
+      }
+      await applyRanking(db, unique);
+      return {
+        top: unique.map((dealId, i) => ({ position: i + 1, id: dealId })),
+      };
+    }
+    case "list_top_deals": {
+      const ids = await rankedDealIds(db);
+      if (ids.length === 0) return { top: [] };
+      const { data } = await db.from("deals").select(DEAL_COLUMNS)
+        .in("id", ids);
+      const byId = new Map(
+        (data ?? []).map((d: Record<string, unknown>) => [d.id, d]),
+      );
+      return {
+        top: ids.map((dealId, i) => ({
+          position: i + 1,
+          ...(byId.get(dealId) as Record<string, unknown>),
+        })),
+      };
+    }
+    case "remove_from_top": {
+      const id = args.id;
+      if (typeof id !== "string" || !id) return { error: "id is required" };
+      if (!(await dealExists(db, id))) return { error: `Deal not found: ${id}` };
+      await db.from("deals").update({ sort_order: 0 }).eq("id", id);
+      const remaining = await rankedDealIds(db);
+      await applyRanking(db, remaining);
+      return {
+        removed: id,
+        top: remaining.map((dealId, i) => ({ position: i + 1, id: dealId })),
+      };
     }
     case "list_categories": {
       const { data } = await db.from("categories").select("name").order("name");
