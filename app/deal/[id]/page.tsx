@@ -8,6 +8,7 @@ import {
   formatDate,
   getDealById,
   getDeals,
+  hasFixedExpiry,
 } from "@/lib/deals";
 import CopyCode from "@/components/CopyCode";
 import BrandTile from "@/components/BrandTile";
@@ -73,6 +74,10 @@ export default async function DealPage({ params }: { params: { id: string } }) {
           "Final price and terms confirmed on the official website before you pay",
         ];
 
+  const fixedExpiry = hasFixedExpiry(deal);
+  const isApplication =
+    deal.category === "Startup Deals" || /\bappl(y|ication)\b/i.test(deal.description);
+
   const steps = deal.code
     ? [
         `Tap "Get Deal" to open the official ${deal.brand} website.`,
@@ -80,12 +85,19 @@ export default async function DealPage({ params }: { params: { id: string } }) {
         `Copy the code from this page — ${deal.code} — and paste it in the promo / coupon field at signup or checkout.`,
         `Confirm the discount is applied, then finish. If the code fails, tell us via "Report expired" below.`,
       ]
-    : [
-        `Tap "Get Deal" to open the official ${deal.brand} website.`,
-        `Sign up or open the pricing page — this offer needs no promo code.`,
-        `The free tier / discount is applied automatically by ${deal.brand}.`,
-        `Confirm the final price shows as expected before you pay anything.`,
-      ];
+    : isApplication
+      ? [
+          `Tap "Get Deal" to open the official ${deal.brand} program page.`,
+          `Check the eligibility first — who can apply (for example startup stage, funding, or a business email) is written in the offer details above. ${deal.brand} checks this themselves; approval is not instant.`,
+          `Click Apply on their page and fill the short form with your real details and business / work email.`,
+          `If ${deal.brand} approves you, they email you and the credits or free plan are added to your ${deal.brand} account. The exact amount and how long it lasts are confirmed in that approval email.`,
+        ]
+      : [
+          `Tap "Get Deal" to open the official ${deal.brand} website.`,
+          `Sign up for a free account — this offer needs no promo code and no card.`,
+          `The free plan / credits are active on your account right after signup, exactly as described above.`,
+          `Any paid upgrade is optional and happens only on the official ${deal.brand} website — you never pay anything on Prime Khatab Deals.`,
+        ];
 
   const faqs: Faq[] = [
     {
@@ -103,7 +115,9 @@ export default async function DealPage({ params }: { params: { id: string } }) {
     },
     {
       q: `When does this ${deal.brand} deal expire?`,
-      a: `This listing is valid until ${formatDate(deal.expiry)}${left <= 45 && left > 0 ? ` — that is about ${left} day${left === 1 ? "" : "s"} from now` : ""}. Brands can change or end offers early, so the date on the official website is final.`,
+      a: fixedExpiry
+        ? `This listing is valid until ${formatDate(deal.expiry)}${left <= 45 && left > 0 ? ` — that is about ${left} day${left === 1 ? "" : "s"} from now` : ""}. Brands can change or end offers early, so the date on the official website is final.`
+        : `This is an ongoing offer with no fixed end date published by ${deal.brand}. They can change or end it at any time, so the terms on the official website are final.`,
     },
   ];
 
@@ -176,7 +190,7 @@ export default async function DealPage({ params }: { params: { id: string } }) {
             ) : (
               " · No code needed"
             )}{" "}
-            · Valid until {formatDate(deal.expiry)}
+            · {fixedExpiry ? `Valid until ${formatDate(deal.expiry)}` : "Ongoing offer"}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {deal.badge && (
@@ -211,10 +225,19 @@ export default async function DealPage({ params }: { params: { id: string } }) {
               </span>
             )}
             <span>
-              <span className="font-medium text-slate-700">
-                {left > 0 ? `${left} day${left === 1 ? "" : "s"} left` : "Expired"}
-              </span>{" "}
-              · until {formatDate(deal.expiry)}
+              {fixedExpiry ? (
+                <>
+                  <span className="font-medium text-slate-700">
+                    {left > 0 ? `${left} day${left === 1 ? "" : "s"} left` : "Expired"}
+                  </span>{" "}
+                  · until {formatDate(deal.expiry)}
+                </>
+              ) : (
+                <>
+                  <span className="font-medium text-slate-700">Ongoing offer</span> · no fixed
+                  end date
+                </>
+              )}
             </span>
             {deal.verified && (
               <span>
@@ -266,8 +289,9 @@ export default async function DealPage({ params }: { params: { id: string } }) {
                 Get Deal
               </a>
               <span className="text-[13px] text-slate-500">
-                Valid until {formatDate(deal.expiry)}
-                {left <= 45 && left > 0 ? ` (${left} day${left === 1 ? "" : "s"} left)` : ""}
+                {fixedExpiry
+                  ? `Valid until ${formatDate(deal.expiry)}${left <= 45 && left > 0 ? ` (${left} day${left === 1 ? "" : "s"} left)` : ""}`
+                  : "Ongoing offer — no fixed end date"}
               </span>
             </div>
             <p className="mt-4 text-xs text-slate-400">
@@ -303,7 +327,7 @@ export default async function DealPage({ params }: { params: { id: string } }) {
           </ul>
         </section>
         <section>
-          <h2 className="text-lg font-semibold text-slate-900">How to Redeem</h2>
+          <h2 className="text-lg font-semibold text-slate-900">How to Get This Deal</h2>
           <ol className="mt-3 space-y-2">
             {steps.map((s, i) => (
               <li
@@ -319,6 +343,30 @@ export default async function DealPage({ params }: { params: { id: string } }) {
           </ol>
         </section>
       </div>
+
+      {/* Good to know */}
+      <section className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5">
+        <h2 className="text-base font-semibold text-slate-900">Good to know</h2>
+        <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
+          <li>
+            You pay nothing on Prime Khatab Deals — signup, application and payment (if any) all
+            happen only on the official {deal.brand} website.
+          </li>
+          <li>
+            Who can get this offer — for example students only, startups only, or a business
+            email — is checked by {deal.brand} on their site. The eligibility written in the
+            offer details above comes from their official program page.
+          </li>
+          <li>
+            If an offer is limited to another country, its description says so — users outside
+            that country may need a VPN to open the official page.
+          </li>
+          <li>
+            Found a better or expired deal? Send it from the Submit a Deal page and we will check
+            and list it.
+          </li>
+        </ul>
+      </section>
 
       {/* FAQ */}
       <section className="mt-10">

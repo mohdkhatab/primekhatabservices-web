@@ -96,12 +96,36 @@ export function inferType(deal: Deal): DealType {
   return "Freebies";
 }
 
+/** Hostname of a deal's official URL, e.g. "cloudflare.com". */
+export function domainOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Logo for a deal whose admin did not supply one: the brand's own site icon,
+ * served by Google's favicon service at 128px. Derived from the deal URL so
+ * EVERY listing shows the real brand logo automatically.
+ */
+export function derivedLogoUrl(deal: Deal): string {
+  const d = domainOf(deal.url);
+  return d ? `https://www.google.com/s2/favicons?domain=${d}&sz=128` : "";
+}
+
+/** True when the deal has a real end date (the API stores 2099-12-31 for open-ended offers). */
+export function hasFixedExpiry(deal: Deal): boolean {
+  return Boolean(deal.expiry) && deal.expiry < "2099-01-01";
+}
+
 /** Fill enrichment defaults so every source (API / Supabase / JSON) renders the same. */
 export function normalizeDeal(deal: Deal): Deal {
   const raw = deal as Deal & { logo_url?: string; image_url?: string };
   return {
     ...deal,
-    logoUrl: deal.logoUrl || raw.logo_url || "",
+    logoUrl: deal.logoUrl || raw.logo_url || derivedLogoUrl(deal),
     imageUrl: deal.imageUrl || raw.image_url || "",
     type: deal.type && (DEAL_TYPES as readonly string[]).includes(deal.type) ? deal.type : inferType(deal),
     views: typeof deal.views === "number" ? deal.views : 0,

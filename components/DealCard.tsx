@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { categorySlug, daysLeft, type Deal } from "@/lib/deals";
+import { categorySlug, daysLeft, hasFixedExpiry, type Deal } from "@/lib/deals";
 import CopyCode from "./CopyCode";
 import BrandTile from "./BrandTile";
 
@@ -22,7 +22,7 @@ export default function DealCard({
       className={`flex flex-col rounded-lg border border-slate-200 bg-white p-4 hover:border-slate-300 ${className}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <BrandTile brand={deal.brand} logoUrl={deal.logoUrl} />
+        <BrandTile brand={deal.brand} logoUrl={deal.logoUrl} size="lg" />
         {deal.badge && (
           <span className="rounded bg-brand-600 px-2 py-0.5 text-xs font-bold text-white">
             {deal.badge}
@@ -60,7 +60,22 @@ export default function DealCard({
         )}
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+      <p className="mt-3 text-xs text-slate-400">
+        {hasFixedExpiry(deal)
+          ? left > 0
+            ? left <= 45
+              ? `Only ${left} day${left === 1 ? "" : "s"} left`
+              : `Valid until ${deal.expiry}`
+            : "Expired"
+          : "Ongoing offer · no fixed end date"}
+      </p>
+      <div className="mt-2 flex items-center gap-2 border-t border-slate-100 pt-3">
+        <Link
+          href={`/deal/${deal.id}`}
+          className="flex h-10 flex-1 items-center justify-center rounded-lg border border-brand-600 px-3 text-sm font-semibold text-brand-600 hover:bg-brand-50"
+        >
+          View Details
+        </Link>
         {deal.code ? (
           <CopyCode code={deal.code} variant="button" />
         ) : (
@@ -68,14 +83,11 @@ export default function DealCard({
             href={deal.url}
             target="_blank"
             rel="noopener noreferrer sponsored"
-            className="flex h-10 items-center rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700"
+            className="flex h-10 flex-1 items-center justify-center rounded-lg bg-brand-600 px-3 text-sm font-semibold text-white hover:bg-brand-700"
           >
             Get Deal
           </a>
         )}
-        <span className="text-right text-xs text-slate-400">
-          {left <= 45 && left > 0 ? `${left}d left` : `Expires ${deal.expiry}`}
-        </span>
       </div>
     </article>
   );
