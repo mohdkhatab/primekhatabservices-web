@@ -168,6 +168,7 @@ type DealInput = {
   published?: boolean;
   featured?: boolean;
   sort_order?: number;
+  limited_time?: boolean;
 };
 
 function validateDeal(
@@ -240,6 +241,7 @@ function pickDealFields(
       "published",
       "featured",
       "sort_order",
+      "limited_time",
     ]
   ) {
     if (body[f] !== undefined) out[f] = body[f];
@@ -264,7 +266,7 @@ async function readJsonBody(
 
 const today = () => new Date().toISOString().slice(0, 10);
 const DEAL_COLUMNS =
-  "id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, published, created_at, views, featured, sort_order";
+  "id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, published, created_at, views, featured, sort_order, limited_time";
 
 async function listDeals(
   db: SupabaseClient,
@@ -338,6 +340,7 @@ async function createDeal(db: SupabaseClient, req: Request): Promise<Response> {
     published: input.published ?? true,
     featured: input.featured ?? false,
     sort_order: typeof input.sort_order === "number" ? input.sort_order : 0,
+    limited_time: input.limited_time ?? true,
   };
   const { data, error: dbError } = await db.from("deals").insert(deal).select(
     DEAL_COLUMNS,
@@ -1001,7 +1004,8 @@ const MCP_TOOLS = [
         expiry: { type: "string", description: "Expiry date YYYY-MM-DD (omit for ongoing offers)" },
         logo_url: { type: "string", description: "Brand logo image URL (omit to auto-use the brand site icon)" },
         image_url: { type: "string", description: "Poster/banner image URL for the deal page" },
-        featured: { type: "boolean", description: "Pin as BEST at the top" },
+        featured: { type: "boolean", description: "Show the gold BEST tag and pin in the featured group" },
+        limited_time: { type: "boolean", description: "Show the LIMITED TIME tag (default true)" },
         sort_order: { type: "number", description: "Higher = higher among featured deals" },
       },
       required: ["brand", "title", "url", "category"],
@@ -1035,6 +1039,7 @@ const MCP_TOOLS = [
         verified: { type: "boolean" },
         featured: { type: "boolean" },
         sort_order: { type: "number" },
+        limited_time: { type: "boolean" },
       },
       required: ["id"],
     },
@@ -1179,6 +1184,7 @@ async function mcpCallTool(
         published: true,
         featured: input.featured ?? false,
         sort_order: typeof input.sort_order === "number" ? input.sort_order : 0,
+        limited_time: input.limited_time ?? true,
       };
       const { data, error: dbError } = await db.from("deals").insert(deal)
         .select(DEAL_COLUMNS).single();

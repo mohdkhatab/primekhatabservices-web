@@ -34,6 +34,7 @@ export type Deal = {
   clicks?: number;
   benefits?: string[];
   featured?: boolean;
+  limitedTime?: boolean;
 };
 
 /** All deal categories (Topics) — covers every deal type Prime asked for. */
@@ -132,6 +133,7 @@ export function normalizeDeal(deal: Deal): Deal {
     clicks: typeof deal.clicks === "number" ? deal.clicks : 0,
     benefits: Array.isArray(deal.benefits) ? deal.benefits : [],
     featured: Boolean(deal.featured),
+    limitedTime: deal.limited_time !== false,
   };
 }
 
@@ -204,7 +206,7 @@ export async function getDeals(): Promise<Deal[]> {
     try {
       const { data, error } = await supabase
         .from("deals")
-        .select("id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, created_at, views, featured, sort_order")
+        .select("id, brand, title, description, code, url, category, badge, logo_url, image_url, expiry, verified, created_at, views, featured, sort_order, limited_time")
         .eq("published", true)
         .order("featured", { ascending: false })
         .order("sort_order", { ascending: false })

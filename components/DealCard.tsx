@@ -93,7 +93,7 @@ export default function DealCard({
               {deal.badge}
             </span>
           )}
-          <LimitedTimeChip />
+          {deal.limitedTime !== false && <LimitedTimeChip />}
         </div>
       </div>
 

@@ -202,7 +202,7 @@ export default async function DealPage({ params }: { params: { id: string } }) {
                 {deal.badge}
               </span>
             )}
-            <LimitedTimeChip />
+            {deal.limitedTime !== false && <LimitedTimeChip />}
             {deal.verified && (
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
                 Verified{listed ? ` · ${listed}` : ""}
