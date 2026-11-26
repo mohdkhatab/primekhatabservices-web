@@ -1363,6 +1363,96 @@ async function mcpEndpoint(db: SupabaseClient, req: Request): Promise<Response> 
   }
 }
 
+
+// ------------------------------------------------------------- visits ----
+
+async function trackVisit(db: SupabaseClient, req: Request): Promise<Response> {
+  const body = await readJsonBody(req);
+  const path =
+    typeof body?.path === "string" ? body.path.slice(0, 300) : "/";
+  const referrer =
+    typeof body?.referrer === "string" ? body.referrer.slice(0, 500) : null;
+  const ua = (req.headers.get("user-agent") ?? "").slice(0, 400);
+  const fwd = req.headers.get("x-forwarded-for") ?? "";
+  const ip = (fwd.split(",")[0] || req.headers.get("cf-connecting-ip") || "")
+    .trim();
+  let country: string | null = null;
+  let city: string | null = null;
+  let region: string | null = null;
+  const isPrivate =
+    /^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|::1|fc|fe80)/.test(ip);
+  if (ip && !isPrivate) {
+    try {
+      const g = await fetch(
+        `https://ipapi.co/${encodeURIComponent(ip)}/json/`,
+        { headers: { "user-agent": "primekhatab-deals/1.0" } },
+      );
+      if (g.ok) {
+        const gj = await g.json();
+        country = gj.country_name ?? null;
+        city = gj.city ?? null;
+        region = gj.region ?? null;
+      }
+    } catch {
+      // Geo lookup is best-effort; the visit is still logged with its IP.
+    }
+  }
+  const { error: insErr } = await db.from("visits").insert({
+    path,
+    ip: ip || null,
+    country,
+    city,
+    region,
+    referrer,
+    user_agent: ua || null,
+  });
+  if (insErr) return error(insErr.message, 500);
+  return json({ ok: true });
+}
+
+async function listVisits(db: SupabaseClient): Promise<Response> {
+  const { data, error: selErr } = await db
+    .from("visits")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (selErr) return error(selErr.message, 500);
+  const rows = (data ?? []) as Record<string, unknown>[];
+  const { count } = await db
+    .from("visits")
+    .select("*", { count: "exact", head: true });
+  const uniqueIps = new Set(
+    rows.map((r) => r.ip).filter((v) => typeof v === "string" && v),
+  ).size;
+  // "Today" in IST (UTC+05:30).
+  const nowIst = new Date(Date.now() + 5.5 * 3600 * 1000);
+  const todayIst = nowIst.toISOString().slice(0, 10);
+  const today = rows.filter((r) => {
+    const d = new Date(String(r.created_at));
+    return (
+      new Date(d.getTime() + 5.5 * 3600 * 1000).toISOString().slice(0, 10) ===
+        todayIst
+    );
+  }).length;
+  const byCountry: Record<string, number> = {};
+  const byPage: Record<string, number> = {};
+  for (const r of rows) {
+    const c = typeof r.country === "string" && r.country ? r.country : "Unknown";
+    byCountry[c] = (byCountry[c] ?? 0) + 1;
+    const pg = typeof r.path === "string" ? r.path : "/";
+    byPage[pg] = (byPage[pg] ?? 0) + 1;
+  }
+  return json({
+    total: count ?? rows.length,
+    recent_count: rows.length,
+    unique_ips: uniqueIps,
+    today,
+    by_country: byCountry,
+    by_page: byPage,
+    visits: rows,
+  });
+}
+
 // -------------------------------------------------------------- server ----
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -1466,6 +1556,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
       if (req.method === "POST") {
         if (!(await isAdmin(req))) return unauthorized();
         return notifyPush(db, req);
+      }
+    }
+    if (resource === "track" && segments.length === 1) {
+      if (req.method === "POST") return trackVisit(db, req);
+    }
+    if (resource === "visits" && segments.length === 1) {
+      if (req.method === "GET") {
+        if (!(await isAdmin(req))) return unauthorized();
+        return listVisits(db);
       }
     }
     if (resource === "categories" && segments.length === 1) {
