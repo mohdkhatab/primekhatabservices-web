@@ -82,14 +82,10 @@ export default function DealsExplorer({
         </p>
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((deal, i) => (
+          {filtered.map((deal) => (
             <Fragment key={deal.id}>
               <DealCard deal={deal} />
-              {i === 5 && filtered.length > 6 && (
-                <div className="sm:col-span-2 lg:col-span-3">
-                  <NativeAd />
-                </div>
-              )}
+              <NativeAd variant="grid" />
             </Fragment>
           ))}
         </div>

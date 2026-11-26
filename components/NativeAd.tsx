@@ -1,37 +1,44 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
-const SCRIPT_SRC =
-  "https://bancadeltempoidea.org/21/709ff487aff9635be12d29d07db1b71f";
-const CONTAINER_ID = "container-709ff487aff9635be12d29d07db1b71f";
-
 /**
- * Native banner ad inside a small, neat frame (Prime's spec: a compact
- * framed box mid-page — homepage grid, category grids and deal detail
- * pages — NOT a full-width strip). The network invoke script is injected
- * once per page; the ad renders inside the frame's container.
+ * Native banner ad inside a SMALL iframe frame (Prime's spec: after
+ * every deal, one small iframe; the ad must show INSIDE the iframe only,
+ * never outside it — "us iframe ke andar hi ad dikhni chahiye, ads
+ * bahar nahi dikhne chahiye").
+ *
+ * The network code (container div + invoke script) runs inside the
+ * iframe's own document, so whatever the unit injects stays contained
+ * in this small fixed-size box. In grids it sits as its own cell right
+ * after each deal card; on deal detail pages it is one standalone
+ * framed box mid-page. Iframes are lazy-loaded.
  */
-export default function NativeAd() {
-  const wrapRef = useRef<HTMLDivElement>(null);
+const AD_HTML = `<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html,body{margin:0;padding:0;overflow:hidden;background:#ffffff}</style>
+</head><body>
+<div id="container-709ff487aff9635be12d29d07db1b71f"></div>
+<script async data-cfasync="false" src="https://bancadeltempoidea.org/21/709ff487aff9635be12d29d07db1b71f"></script>
+</body></html>`;
 
-  useEffect(() => {
-    if (document.querySelector(`script[src="${SCRIPT_SRC}"]`)) return;
-    const script = document.createElement("script");
-    script.src = SCRIPT_SRC;
-    script.async = true;
-    script.setAttribute("data-cfasync", "false");
-    script.setAttribute("fetchpriority", "high");
-    (wrapRef.current ?? document.body).appendChild(script);
-  }, []);
-
+export default function NativeAd({
+  variant = "standalone",
+}: {
+  variant?: "grid" | "standalone";
+}) {
   return (
-    <div ref={wrapRef} className="mx-auto w-full max-w-3xl">
-      <div className="rounded-lg border border-slate-300 bg-white px-3 pb-3 pt-2">
-        <p className="pb-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+    <div className={variant === "grid" ? "w-full" : "mx-auto w-full max-w-[580px]"}>
+      <div className="flex h-full flex-col rounded-lg border border-slate-300 bg-white px-2 pb-2 pt-1.5">
+        <p className="pb-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
           Advertisement
         </p>
-        <div id={CONTAINER_ID} className="min-h-[100px]" />
+        <iframe
+          title="Advertisement"
+          srcDoc={AD_HTML}
+          className="block h-[130px] w-full flex-1 border-0"
+          scrolling="no"
+          loading="lazy"
+        />
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -97,26 +98,13 @@ export default async function CategoryPage({ params }: { params: { slug: string 
 
       {deals.length === 0 ? (
         <EmptyState />
-      ) : deals.length > 6 ? (
-        <>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {deals.slice(0, 6).map((d) => (
-              <DealCard key={d.id} deal={d} />
-            ))}
-          </div>
-          <div className="my-6">
-            <NativeAd />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {deals.slice(6).map((d) => (
-              <DealCard key={d.id} deal={d} />
-            ))}
-          </div>
-        </>
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {deals.map((d) => (
-            <DealCard key={d.id} deal={d} />
+            <Fragment key={d.id}>
+              <DealCard deal={d} />
+              <NativeAd variant="grid" />
+            </Fragment>
           ))}
         </div>
       )}
