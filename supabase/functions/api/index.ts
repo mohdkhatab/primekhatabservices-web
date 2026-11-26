@@ -1382,19 +1382,37 @@ async function trackVisit(db: SupabaseClient, req: Request): Promise<Response> {
   const isPrivate =
     /^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|::1|fc|fe80)/.test(ip);
   if (ip && !isPrivate) {
+    // Geo lookup is best-effort (ipwho.is, then ip-api as fallback);
+    // the visit is logged with its IP even if both lookups fail.
     try {
-      const g = await fetch(
-        `https://ipapi.co/${encodeURIComponent(ip)}/json/`,
-        { headers: { "user-agent": "primekhatab-deals/1.0" } },
-      );
+      const g = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`);
       if (g.ok) {
         const gj = await g.json();
-        country = gj.country_name ?? null;
-        city = gj.city ?? null;
-        region = gj.region ?? null;
+        if (gj && gj.success !== false) {
+          country = gj.country ?? null;
+          city = gj.city ?? null;
+          region = gj.region ?? null;
+        }
       }
     } catch {
-      // Geo lookup is best-effort; the visit is still logged with its IP.
+      // fall through to the fallback below
+    }
+    if (!country) {
+      try {
+        const g2 = await fetch(
+          `http://ip-api.com/json/${encodeURIComponent(ip)}`,
+        );
+        if (g2.ok) {
+          const gj2 = await g2.json();
+          if (gj2 && gj2.status === "success") {
+            country = gj2.country ?? null;
+            city = gj2.city ?? null;
+            region = gj2.regionName ?? null;
+          }
+        }
+      } catch {
+        // no geo this time; IP-only row is fine
+      }
     }
   }
   const { error: insErr } = await db.from("visits").insert({
