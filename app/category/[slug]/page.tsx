@@ -12,7 +12,7 @@ import DealCard from "@/components/DealCard";
 import EmptyState from "@/components/EmptyState";
 import NativeAd from "@/components/NativeAd";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const OG_IMAGE =
   "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/og-image.jpg";

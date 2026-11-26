@@ -2,7 +2,7 @@ import { getCategoryNames, getDeals } from "@/lib/deals";
 import DealsExplorer from "@/components/DealsExplorer";
 import EmptyState from "@/components/EmptyState";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 /**
  * Home — a plain deal directory (UI_SPEC): category chips, deal-type

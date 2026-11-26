@@ -20,7 +20,7 @@ import PosterBanner from "@/components/PosterBanner";
 import FaqAccordion, { type Faq } from "@/components/FaqAccordion";
 import NativeAd from "@/components/NativeAd";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const OG_IMAGE =
   "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/og-image.jpg";

@@ -193,7 +193,7 @@ async function fetchDealsFromApi(): Promise<Deal[] | null> {
   const base = apiBase();
   if (!base) return null;
   try {
-    const res = await fetch(`${base}/deals?limit=200`, { cache: "no-store" });
+    const res = await fetch(`${base}/deals?limit=200`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const body = (await res.json()) as { deals?: Deal[] };
     return Array.isArray(body.deals) ? body.deals : null;
@@ -230,7 +230,7 @@ export async function getDealById(id: string): Promise<Deal | undefined> {
   const base = apiBase();
   if (base) {
     try {
-      const res = await fetch(`${base}/deals/${encodeURIComponent(id)}`, { cache: "no-store" });
+      const res = await fetch(`${base}/deals/${encodeURIComponent(id)}`, { next: { revalidate: 60 } });
       if (res.ok) {
         const body = (await res.json()) as { deal?: Deal };
         if (body.deal && !isExpired(body.deal)) return normalizeDeal(body.deal);

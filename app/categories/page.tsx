@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DEAL_TYPES, categorySlug, getCategoryNames } from "@/lib/deals";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const OG_IMAGE =
   "https://pkvglyflccxwfkfipfvc.supabase.co/storage/v1/object/public/site-assets/og-image.jpg";
