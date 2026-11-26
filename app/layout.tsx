@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import PushPrompt from "@/components/PushPrompt";
+import NativeAd from "@/components/NativeAd";
 
 // One font only (UI_SPEC): Inter, self-hosted/optimized by next/font.
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -118,6 +119,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             HilltopAds: paste the site verification / zone script here. */}
         <Header />
         <main className="mx-auto min-h-[60vh] max-w-6xl px-4 py-8">{children}</main>
+        <NativeAd />
         <Footer />
         <CookieConsent />
         <PushPrompt />
