@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { DEAL_TYPES, type Deal } from "@/lib/deals";
 import DealCard from "./DealCard";
+import NativeAd from "./NativeAd";
 
 /**
  * DealsExplorer — the whole home listing (UI_SPEC): category chips row,
@@ -81,8 +82,15 @@ export default function DealsExplorer({
         </p>
       ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((deal) => (
-            <DealCard key={deal.id} deal={deal} />
+          {filtered.map((deal, i) => (
+            <Fragment key={deal.id}>
+              <DealCard deal={deal} />
+              {i === 5 && filtered.length > 6 && (
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <NativeAd />
+                </div>
+              )}
+            </Fragment>
           ))}
         </div>
       )}

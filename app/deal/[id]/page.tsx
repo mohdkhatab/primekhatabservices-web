@@ -18,6 +18,7 @@ import ShareButton from "@/components/ShareButton";
 import DealCard from "@/components/DealCard";
 import PosterBanner from "@/components/PosterBanner";
 import FaqAccordion, { type Faq } from "@/components/FaqAccordion";
+import NativeAd from "@/components/NativeAd";
 
 export const dynamic = "force-dynamic";
 
@@ -379,6 +380,11 @@ export default async function DealPage({ params }: { params: { id: string } }) {
           </li>
         </ul>
       </section>
+
+      {/* Native banner — small framed slot mid-page */}
+      <div className="mt-10">
+        <NativeAd />
+      </div>
 
       {/* FAQ */}
       <section className="mt-10">
